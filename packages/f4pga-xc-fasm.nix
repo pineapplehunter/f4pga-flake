@@ -11,7 +11,6 @@
 buildPythonPackage {
   pname = "f4pga-xc-fasm";
   version = "unstable-2022-02-28";
-
   format = "setuptools";
 
   src = fetchFromGitHub {

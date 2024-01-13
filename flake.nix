@@ -5,14 +5,26 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
 
   outputs = { self, nixpkgs, flake-utils }:
+    let
+      package-names = map
+        (filename: nixpkgs.lib.strings.removeSuffix ".nix" filename)
+        (builtins.attrNames (builtins.readDir ./packages));
+    in
     {
       overlays.default = final: prev: {
         python3 = prev.python3.override {
-          packageOverrides = python-self: python-super: {
-            inherit (self.packages.${final.system}) prjxray f4pga fasm f4pga-xc-fasm;
-          };
+          packageOverrides = python-self: python-super:
+            let
+              makePackage = name: {
+                inherit name;
+                value = python-self.callPackage ./packages/${name}.nix { };
+              };
+            in
+            builtins.listToAttrs (map makePackage package-names);
         };
       };
+      lib = nixpkgs.lib;
+      inherit package-names;
     } // (
       flake-utils.lib.eachDefaultSystem (system:
         let
@@ -22,20 +34,29 @@
           };
         in
         {
-          packages.f4pga = pkgs.python3.pkgs.callPackage ./packages/f4pga.nix { };
-          packages.prjxray = pkgs.python3.pkgs.callPackage ./packages/prjxray.nix { };
-          packages.fasm = pkgs.python3.pkgs.callPackage ./packages/fasm.nix { };
-          packages.f4pga-xc-fasm = pkgs.python3.pkgs.callPackage ./packages/f4pga-xc-fasm.nix { };
-          packages.update-all = pkgs.writeShellScriptBin "update-all" ''
-            for p in f4pga prjxray fasm f4pga-xc-fasm; do
-              ${nixpkgs.lib.getExe pkgs.nix-update} --version=branch --flake $p
-            done
-          '';
+          packages = {
+            update-all = pkgs.writeShellScriptBin "update-all" ''
+              for p in f4pga prjxray fasm f4pga-xc-fasm; do
+                ${nixpkgs.lib.getExe pkgs.nix-update} --version=branch --flake $p
+              done
+            '';
+          } //
+          (builtins.listToAttrs (map
+            (name: {
+              inherit name;
+              value = pkgs.python3.pkgs.${name};
+            })
+            package-names));
 
-          app.default = self.packages.${system}.update-all;
+          apps.update = {
+            type = "app";
+            program = (nixpkgs.lib.getExe self.packages.${system}.update-all);
+          };
 
-          devShells.xc7 = pkgs.callPackage ./env/xc7.nix { };
-          devShells.default = self.devShells.${system}.xc7;
+          devShells = rec {
+            xc7 = pkgs.callPackage ./env/xc7.nix { };
+            default = xc7;
+          };
 
           formatter = pkgs.nixpkgs-fmt;
         }));

@@ -8,7 +8,6 @@
 buildPythonPackage {
   pname = "fasm";
   version = "unstable-2022-07-25";
-
   format = "setuptools";
 
   src = fetchFromGitHub {

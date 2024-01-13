@@ -9,7 +9,6 @@
 buildPythonPackage {
   pname = "f4pga";
   version = "unstable-2023-09-13";
-
   format = "setuptools";
 
   src = fetchFromGitHub {
