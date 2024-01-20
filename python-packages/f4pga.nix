@@ -34,5 +34,7 @@ buildPythonPackage {
 
   doCheck = false;
 
+  pythonImportsCheck = [ "f4pga" ];
+
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 }

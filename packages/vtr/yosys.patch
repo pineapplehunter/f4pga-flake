@@ -1,0 +1,55 @@
+diff --git a/yosys/Makefile b/yosys/Makefile
+index 6d831e566..957707533 100644
+--- a/yosys/Makefile
++++ b/yosys/Makefile
+@@ -91,7 +91,7 @@ YOSYS_SRC := $(dir $(firstword $(MAKEFILE_LIST)))
+ VPATH := $(YOSYS_SRC)
+ 
+ CXXSTD ?= c++11
+-CXXFLAGS := $(CXXFLAGS) -Wall -Wextra -ggdb -I. -I"$(YOSYS_SRC)" -MD -MP -D_YOSYS_ -fPIC -I$(PREFIX)/include
++CXXFLAGS := $(CXXFLAGS) -Wall -Wextra -ggdb -I. -I"$(YOSYS_SRC)" -MD -MP -D_YOSYS_ -fPIC $(shell pkg-config --cflags --libs readline libffi tcl)
+ LDLIBS := $(LDLIBS) -lstdc++ -lm
+ PLUGIN_LDFLAGS :=
+ PLUGIN_LDLIBS :=
+@@ -147,12 +147,7 @@ YOSYS_VER := 0.32
+ # tarballs generated with git-archive(1) using .gitattributes. The git repo
+ # will have this file in its unexpanded form tough, in which case we fall
+ # back to calling git directly.
+-TARBALL_GIT_REV := $(shell cat $(YOSYS_SRC)/.gitcommit)
+-ifeq ($(TARBALL_GIT_REV),$$Format:%h$$)
+-GIT_REV := $(shell GIT_DIR=$(YOSYS_SRC)/.git git rev-parse --short=9 HEAD || echo UNKNOWN)
+-else
+-GIT_REV := $(TARBALL_GIT_REV)
+-endif
++GIT_REV := @git.rev@
+ 
+ OBJS = kernel/version_$(GIT_REV).o
+ 
+@@ -215,7 +210,7 @@ ABC_ARCHFLAGS += "-DABC_NO_RLIMIT"
+ endif
+ 
+ ifeq ($(CONFIG),clang)
+-CXX = clang
++CXX = clang++
+ LD = clang++
+ CXXFLAGS += -std=$(CXXSTD) -Os
+ ABCMKARGS += ARCHFLAGS="-DABC_USE_STDINT_H -Wno-c++11-narrowing $(ABC_ARCHFLAGS)"
+@@ -755,6 +750,7 @@ endif
+ 
+ %.o: %.cc
+ 	$(Q) mkdir -p $(dir $@)
++	@echo $(CXX) -o $@ -c $(CPPFLAGS) $(CXXFLAGS) $<
+ 	$(P) $(CXX) -o $@ -c $(CPPFLAGS) $(CXXFLAGS) $<
+ 
+ %.pyh: %.h
+@@ -771,8 +767,8 @@ endif
+ 	$(Q) mkdir -p $(dir $@)
+ 	$(P) $(CXX) -o $@ -c $(CPPFLAGS) $(CXXFLAGS) $<
+ 
+-YOSYS_VER_STR := Yosys $(YOSYS_VER) (git sha1 $(GIT_REV), $(notdir $(CXX)) $(shell \
+-		$(CXX) --version | tr ' ()' '\n' | grep '^[0-9]' | head -n1) $(filter -f% -m% -O% -DNDEBUG,$(CXXFLAGS)))
++YOSYS_VER_STR := Yosys $(YOSYS_VER) @git.rev@ $(shell \
++	$(CXX) --version | tr ' ()' '\n' | grep '^[0-9]' | head -n1) $(filter -f% -m% -O% -DNDEBUG,$(CXXFLAGS)))
+ 
+ kernel/version_$(GIT_REV).cc: $(YOSYS_SRC)/Makefile
+ 	$(P) rm -f kernel/version_*.o kernel/version_*.d kernel/version_*.cc

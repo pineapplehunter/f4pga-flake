@@ -1,0 +1,23 @@
+diff --git a/libs/libvtrcapnproto/CMakeLists.txt b/libs/libvtrcapnproto/CMakeLists.txt
+index cd97b0ec4..b241a25e0 100644
+--- a/libs/libvtrcapnproto/CMakeLists.txt
++++ b/libs/libvtrcapnproto/CMakeLists.txt
+@@ -35,7 +35,6 @@ if (VPR_ENABLE_INTERCHANGE)
+     set(IC_DIR ${CMAKE_SOURCE_DIR}/libs/EXTERNAL/libinterchange/interchange)
+     set(CAPNPC_SRC_PREFIX ${IC_DIR})
+ 
+-    find_program(WGET wget REQUIRED)
+     find_package(ZLIB REQUIRED)
+ 
+     # Add Java schema
+@@ -43,9 +42,7 @@ if (VPR_ENABLE_INTERCHANGE)
+     add_custom_command(
+         OUTPUT ${JAVA_SCHEMA}
+         COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/schema/capnp/
+-        COMMAND ${WGET}
+-            https://raw.githubusercontent.com/capnproto/capnproto-java/master/compiler/src/main/schema/capnp/java.capnp
+-            -O ${JAVA_SCHEMA}
++        COMMAND cp -Lv @java-schema@ ${JAVA_SCHEMA}
+     )
+ 
+     add_custom_target(

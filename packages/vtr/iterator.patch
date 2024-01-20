@@ -1,0 +1,257 @@
+diff --git a/libs/EXTERNAL/libtatum/libtatum/tatum/tags/TimingTags.hpp b/libs/EXTERNAL/libtatum/libtatum/tatum/tags/TimingTags.hpp
+index 192442cfe..4d0b7f81d 100644
+--- a/libs/EXTERNAL/libtatum/libtatum/tatum/tags/TimingTags.hpp
++++ b/libs/EXTERNAL/libtatum/libtatum/tatum/tags/TimingTags.hpp
+@@ -104,14 +104,14 @@ class TimingTags {
+ 
+         //Iterator definition
+         template<class T>
+-        class Iterator : public std::iterator<std::random_access_iterator_tag, T> {
++        class Iterator {
+             friend TimingTags;
+             public:
+-                using value_type = typename std::iterator<std::random_access_iterator_tag, T>::value_type;
+-                using difference_type = typename std::iterator<std::random_access_iterator_tag, T>::difference_type;
+-                using pointer = typename std::iterator<std::random_access_iterator_tag, T>::pointer;
+-                using reference = typename std::iterator<std::random_access_iterator_tag, T>::reference;
+-                using iterator_category = typename std::iterator<std::random_access_iterator_tag, T>::iterator_category;
++                using value_type = T;
++                using difference_type = std::ptrdiff_t;
++                using pointer = T*;
++                using reference = T&;
++                using iterator_category = std::random_access_iterator_tag;
+             public:
+                 Iterator(): p_(nullptr) {}
+                 Iterator(pointer p): p_(p) {}
+@@ -163,7 +163,7 @@ class TimingTags {
+         size_t capacity() const;
+ 
+         ///Finds a timing tag in the current set which matches tag
+-        ///\returns A pair of bool and iterator. 
++        ///\returns A pair of bool and iterator.
+         //          The bool is true if it is valid for iterator to be processed.
+         //          The iterator is not equal to end(tag.type()) if a matching tag was found
+         std::pair<bool,iterator> find_matching_tag(const TimingTag& tag, bool arr_must_be_valid);
+@@ -172,10 +172,10 @@ class TimingTags {
+         ///\returns An iterator to the tag if found, or end(type) if not found
+         iterator find_matching_tag(TagType type, DomainId launch_domain, DomainId capture_domain);
+ 
+-        ///Find a TimingTag matching the specified DATA_REQUIRED tag provided there is 
++        ///Find a TimingTag matching the specified DATA_REQUIRED tag provided there is
+         //a valid associated DATA_ARRIVAL tag
+-        ///\returns A a pair of bool and iterator. The bool indicates if a valid arrival was found, 
+-        ///         the iterator is the required tag matching launch and capture which has a valid 
++        ///\returns A a pair of bool and iterator. The bool indicates if a valid arrival was found,
++        ///         the iterator is the required tag matching launch and capture which has a valid
+         //          corresponding arrival time, or end(TagType::DATA_REQUIRED)
+         std::pair<bool,iterator> find_data_required_with_valid_data_arrival(DomainId launch_domain, DomainId capture_domain);
+ 
+@@ -220,7 +220,7 @@ TimingTags::const_iterator find_maximum_tag(TimingTags::tag_range tags);
+ 
+ //Return the tag for the specified clock domains
+ TimingTags::const_iterator find_tag(TimingTags::tag_range tags,
+-                                           DomainId launch_domain, 
++                                           DomainId launch_domain,
+                                            DomainId capture_domain);
+ 
+ //Returns true of the specified set of tags would constrain a node of type node_type
+diff --git a/libs/librrgraph/src/base/rr_node_impl.h b/libs/librrgraph/src/base/rr_node_impl.h
+index 4a76d0851..5ae1ad58e 100644
+--- a/libs/librrgraph/src/base/rr_node_impl.h
++++ b/libs/librrgraph/src/base/rr_node_impl.h
+@@ -7,16 +7,22 @@
+ #include "rr_node.h"
+ #include "rr_graph_storage.h"
+ 
+-class node_idx_iterator : public std::iterator<std::bidirectional_iterator_tag, const t_rr_node> {
++class node_idx_iterator {
+   public:
++    using iterator_category = std::bidirectional_iterator_tag;
++    using value_type = const t_rr_node;
++    using difference_type = std::ptrdiff_t;
++    using pointer = const t_rr_node*;
++    using reference = const t_rr_node&;
++
+     node_idx_iterator(t_rr_node value)
+         : value_(value) {}
+ 
+-    iterator operator++() {
++    node_idx_iterator operator++() {
+         value_.next_node();
+         return *this;
+     }
+-    iterator operator--() {
++    node_idx_iterator operator--() {
+         value_.prev_node();
+         return *this;
+     }
+diff --git a/libs/librrgraph/src/base/rr_node_types.h b/libs/librrgraph/src/base/rr_node_types.h
+index 56c2b97c3..73fe7824a 100644
+--- a/libs/librrgraph/src/base/rr_node_types.h
++++ b/libs/librrgraph/src/base/rr_node_types.h
+@@ -64,15 +64,20 @@ typedef uint16_t t_edge_size;
+  *
+  * Used inconjunction with vtr::Range to return ranges of edge indices
+  */
+-class edge_idx_iterator : public std::iterator<std::bidirectional_iterator_tag, t_edge_size> {
++class edge_idx_iterator {
+   public:
++    using iterator_category = std::bidirectional_iterator_tag;
++    using value_type = t_edge_size;
++    using difference_type = std::ptrdiff_t;
++    using pointer = t_edge_size*;
++    using reference = t_edge_size&;
+     edge_idx_iterator(value_type init)
+         : value_(init) {}
+-    iterator operator++() {
++    edge_idx_iterator operator++() {
+         value_ += 1;
+         return *this;
+     }
+-    iterator operator--() {
++    edge_idx_iterator operator--() {
+         value_ -= 1;
+         return *this;
+     }
+diff --git a/libs/libvtrutil/src/vtr_array_view.h b/libs/libvtrutil/src/vtr_array_view.h
+index 3383263e0..72aa09255 100644
+--- a/libs/libvtrutil/src/vtr_array_view.h
++++ b/libs/libvtrutil/src/vtr_array_view.h
+@@ -143,8 +143,8 @@ class array_view {
+  * @brief Implements a fixed length view to an array which is indexed by vtr::StrongId
+  *
+  * The main use of this container is to behave like a std::span which is
+- * indexed by a vtr::StrongId instead of size_t. It assumes that K is explicitly 
+- * convertable to size_t 
++ * indexed by a vtr::StrongId instead of size_t. It assumes that K is explicitly
++ * convertable to size_t
+  * (i.e. via operator size_t()), and can be explicitly constructed from a size_t.
+  */
+ template<typename K, typename V>
+@@ -207,19 +207,13 @@ class array_view_id : private array_view<V> {
+      * to iterate through the keys with a range-based for loop
+      *
+      */
+-    class key_iterator : public std::iterator<std::bidirectional_iterator_tag, key_type> {
++    class key_iterator {
+       public:
+-        /**
+-         * @brief Intermediate type my_iter
+-         *
+-         * We use the intermediate type my_iter to avoid a potential ambiguity for which
+-         * clang generates errors and warnings
+-         */
+-        using my_iter = typename std::iterator<std::bidirectional_iterator_tag, K>;
+-        using typename my_iter::iterator;
+-        using typename my_iter::pointer;
+-        using typename my_iter::reference;
+-        using typename my_iter::value_type;
++        using iterator_category = std::bidirectional_iterator_tag;
++        using value_type = key_type;
++        using difference_type = std::ptrdiff_t;
++        using pointer = key_type*;
++        using reference = key_type&;
+ 
+         key_iterator(key_iterator::value_type init)
+             : value_(init) {}
+diff --git a/libs/libvtrutil/src/vtr_ragged_matrix.h b/libs/libvtrutil/src/vtr_ragged_matrix.h
+index bbe7fea78..3c6389b3a 100644
+--- a/libs/libvtrutil/src/vtr_ragged_matrix.h
++++ b/libs/libvtrutil/src/vtr_ragged_matrix.h
+@@ -10,12 +10,12 @@ namespace vtr {
+ 
+ /**
+  * @brief A 2 dimensional 'ragged' matrix with rows indexed by Index0, and each row of variable length (indexed by Index1)
+- * 
++ *
+  * Example:
+- * 
++ *
+  *       std::vector<int> row_sizes = {1, 5, 3, 10};
+  *       FlatRaggedMatrix<float> matrix(row_sizes);
+- * 
++ *
+  *       //Fill in all entries with ascending values
+  *       float value = 1.;
+  *       for (size_t irow = 0; irow < row_sizes.size(); ++irow) {
+@@ -24,12 +24,12 @@ namespace vtr {
+  *               value += 1.;
+  *           }
+  *       }
+- * 
+- * 
++ *
++ *
+  * For efficiency, this class uses a flat memory layout,
+  * where all elements are laid out contiguiously (one row
+  * after another).
+- * 
++ *
+  * Expects Index0 and Index1 to be convertable to size_t.
+  */
+ template<typename T, typename Index0 = size_t, typename Index1 = size_t>
+@@ -39,9 +39,9 @@ class FlatRaggedMatrix {
+     FlatRaggedMatrix() = default;
+ 
+     /**
+-     * @brief Constructs matrix with 'nrows' rows. 
++     * @brief Constructs matrix with 'nrows' rows.
+      *
+-     * The row length is determined by calling 
++     * The row length is determined by calling
+      * 'row_length_callback' with the associated row index.
+      */
+     template<class Callback>
+@@ -56,9 +56,9 @@ class FlatRaggedMatrix {
+         : FlatRaggedMatrix(std::begin(container), std::end(container), default_value) {}
+ 
+     /**
+-     * @brief Constructs matrix from an iterator range. 
++     * @brief Constructs matrix from an iterator range.
+      *
+-     * The length of the range is the number of rows, and iterator values are the row lengths. 
++     * The length of the range is the number of rows, and iterator values are the row lengths.
+      */
+     template<class Iter>
+     FlatRaggedMatrix(Iter row_size_first, Iter row_size_last, T default_value = T()) {
+@@ -212,8 +212,14 @@ class FlatRaggedMatrix {
+      * uses a callback to determine row lengths.
+      */
+     template<class Callback>
+-    class RowLengthIterator : public std::iterator<std::random_access_iterator_tag, size_t> {
++    class RowLengthIterator {
+       public:
++        using iterator_category = std::random_access_iterator_tag;
++        using value_type = size_t;
++        using difference_type = std::ptrdiff_t;
++        using pointer = size_t*;
++        using reference = size_t&;
++        
+         RowLengthIterator(size_t irow, Callback& callback)
+             : irow_(irow)
+             , callback_(callback) {}
+diff --git a/libs/libvtrutil/src/vtr_vector.h b/libs/libvtrutil/src/vtr_vector.h
+index 639f62590..8eab81427 100644
+--- a/libs/libvtrutil/src/vtr_vector.h
++++ b/libs/libvtrutil/src/vtr_vector.h
+@@ -160,14 +160,13 @@ class vector : private std::vector<V, Allocator> {
+      * This allows end-users to call the parent class's keys() member
+      * to iterate through the keys with a range-based for loop
+      */
+-    class key_iterator : public std::iterator<std::bidirectional_iterator_tag, key_type> {
++    class key_iterator{
+       public:
+-        ///@brief We use the intermediate type my_iter to avoid a potential ambiguity for which clang generates errors and warnings
+-        using my_iter = typename std::iterator<std::bidirectional_iterator_tag, K>;
+-        using typename my_iter::iterator;
+-        using typename my_iter::pointer;
+-        using typename my_iter::reference;
+-        using typename my_iter::value_type;
++        using iterator_category = std::bidirectional_iterator_tag;
++        using value_type = key_type;
++        using difference_type = std::ptrdiff_t;
++        using pointer = key_type*;
++        using reference = key_type&;
+ 
+         ///@brief constructor
+         key_iterator(key_iterator::value_type init)

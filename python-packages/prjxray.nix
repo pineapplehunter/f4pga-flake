@@ -33,6 +33,8 @@ buildPythonPackage {
 
   doCheck = false;
 
+  pythonImportsCheck = [ "prjxray" ];
+
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 
 }

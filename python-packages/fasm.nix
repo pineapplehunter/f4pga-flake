@@ -24,6 +24,8 @@ buildPythonPackage {
 
   doCheck = false;
 
+  pythonImportsCheck = [ "fasm" ];
+
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 
 }
