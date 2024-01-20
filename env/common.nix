@@ -12,17 +12,24 @@
 , symlinkJoin
 , f4pga-arch-defs
 , runCommand
+, family ? "xc7"
 , allDevices ? true
-, enableXc7a50t ? allDevices
-, enableXc7a100t ? allDevices
-, enableXc7a200t ? allDevices
-, enableXc7a010t ? allDevices
+, enableQlEosS3Wlcsp ? allDevices && family == "eos-s3"
+, enableXc7a50t ? allDevices && family == "xc7"
+, enableXc7a100t ? allDevices && family == "xc7"
+, enableXc7a200t ? allDevices && family == "xc7"
+, enableXc7a010t ? allDevices && family == "xc7"
 }:
 let
   defs = symlinkJoin {
-    name = "xc7-defs";
+    name = "${family}-defs";
     paths = with f4pga-arch-defs;[
-      install-xc7
+      # EOS-S3 devices
+      (lib.optional (family == "eos-s3") install-ql)
+      (lib.optional enableQlEosS3Wlcsp ql-eos-s3_wlcsp)
+
+      # XC7 devices
+      (lib.optional (family == "xc7") install-xc7)
       (lib.optional enableXc7a50t xc7a50t_test)
       (lib.optional enableXc7a100t xc7a100t_test)
       (lib.optional enableXc7a200t xc7a200t_test)
@@ -31,6 +38,7 @@ let
   };
 in
 mkShell {
+  name = "f4pga-${family}-env";
   packages = [
     openfpgaloader
     prjxray-tools
@@ -60,12 +68,12 @@ mkShell {
     simplejson
   ]);
 
-  FPGA_FAM = "xc7";
+  FPGA_FAM = family;
   F4PGA_TIMESTAMP = f4pga-arch-defs.timestamp;
   F4PGA_HASH = f4pga-arch-defs.hash;
-  F4PGA_INSTALL_DIR = runCommand "xc7-defs-dir" { } ''
+  F4PGA_INSTALL_DIR = runCommand "${family}-defs-dir" { } ''
     mkdir -pv $out
-    ln -s ${defs} $out/xc7
+    ln -s ${defs} $out/${family}
   '';
 
 }

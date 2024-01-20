@@ -38,10 +38,8 @@
         in
         {
           packages = {
-            inherit (pkgs) prjxray-config prjxray-tools vtr f4pga-arch-defs;
+            inherit (pkgs) prjxray-config prjxray-tools vtr;
             inherit (pkgs.python3.pkgs) f4pga xc-fasm qlf-fasm fasm prjxray quicklogic-timings-importer tinyfpgab;
-
-
 
             update-all = pkgs.writeShellScriptBin "update-all" ''
               for p in f4pga xc-fasm ql-fasm ql-fasm-utils qlf-fasm fasm prjxray prjxray-config prjxray-tools vtr quicklogic-timings-importer tinyfpgab; do
@@ -56,11 +54,13 @@
           };
 
           devShells = rec {
-            xc7 = pkgs.callPackage ./env/xc7.nix { };
-            xc7a50t = pkgs.callPackage ./env/xc7.nix { allDevices = false; enableXc7a50t = true; };
-            xc7a100t = pkgs.callPackage ./env/xc7.nix { allDevices = false; enableXc7a100t = true; };
-            xc7a200t = pkgs.callPackage ./env/xc7.nix { allDevices = false; enableXc7a200t = true; };
-            xc7a010t = pkgs.callPackage ./env/xc7.nix { allDevices = false; enableXc7a010t = true; };
+            xc7 = pkgs.callPackage ./env/common.nix { family = "xc7"; };
+            xc7a50t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a50t = true; };
+            xc7a100t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a100t = true; };
+            xc7a200t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a200t = true; };
+            xc7a010t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a010t = true; };
+            eos-s3 = pkgs.callPackage ./env/common.nix { family = "eos-s3"; };
+            ql-eos-s3_wlcsp = pkgs.callPackage ./env/common.nix { family = "eos-s3"; allDevices = false; enableQlEosS3Wlcsp = true; };
             default = xc7;
           };
 
