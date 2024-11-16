@@ -4,7 +4,7 @@ This is a **WIP** implementation of F4PGA environment for nix
 ## how to use
 
 ```shell
-$ nix develop
+$ nix develop .#xc7
 $ cd {f4pga-example dir}
 $ {f4pga build commands}
 ```
