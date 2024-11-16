@@ -1,43 +1,46 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, nix-update-script
-, yosys
-, vtr
-, nodejs
-, libxml2
-, openocd
-, yapf
-, icestorm
-, tinyprog
-, verilog
-, prjxray-tools
-, prjxray-config
-, python3
-, cmake
-, gtkwave
-, inkscape
-, cmakeCurses
-, fusesoc
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  nix-update-script,
+  yosys,
+  vtr,
+  nodejs,
+  libxml2,
+  openocd,
+  yapf,
+  icestorm,
+  tinyprog,
+  verilog,
+  prjxray-tools,
+  prjxray-config,
+  python3,
+  cmake,
+  gtkwave,
+  inkscape,
+  cmakeCurses,
+  fusesoc,
 }:
 let
-  python-env = python3.withPackages (ps: with ps;[
-    f4pga
-    flake8
-    pytest
-    xc-fasm
-    qlf-fasm
-    ql-fasm
-    quicklogic-timings-importer
-    tinyfpgab
-    prjxray
-    simplejson
-    pyjson5
-    pyyaml
-    numpy
-    intervaltree
-    mako
-  ]);
+  python-env = python3.withPackages (
+    ps: with ps; [
+      f4pga
+      flake8
+      pytest
+      xc-fasm
+      qlf-fasm
+      ql-fasm
+      quicklogic-timings-importer
+      tinyfpgab
+      prjxray
+      simplejson
+      pyjson5
+      pyyaml
+      numpy
+      intervaltree
+      mako
+    ]
+  );
 in
 stdenv.mkDerivation {
   pname = "f4pga-arch-defs";

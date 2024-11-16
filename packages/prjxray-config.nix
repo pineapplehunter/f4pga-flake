@@ -1,6 +1,11 @@
-{ stdenv, fetchFromGitHub }: stdenv.mkDerivation {
+{
+  stdenv,
+  fetchFromGitHub,
+}:
+
+stdenv.mkDerivation {
   pname = "prjxray-config";
-  version = "unstable-2021-12-14";
+  version = "kintex7-unstable-2021-12-14";
 
   src = fetchFromGitHub {
     owner = "f4pga";
@@ -17,12 +22,13 @@
 
   passAsFile = [ "runScript" ];
 
-  buildPhase = "true";
+  dontBuild = true;
 
   installPhase = ''
     install -dm 755 $out/share/prjxray/database
-    cp -r artix7 kintex7 spartan7 zynq7 $out/share/prjxray/database/
+    for type in artix7 kintex7 spartan7 zynq7; do
+      cp -r $type $out/share/prjxray/database/
+    done
     install -Dm 755 $runScriptPath $out/bin/prjxray-config
   '';
-
 }

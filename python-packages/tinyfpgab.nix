@@ -1,12 +1,13 @@
-{ fetchFromGitHub
-, buildPythonPackage
-, nix-update-script
-, pyserial
+{
+  fetchFromGitHub,
+  buildPythonPackage,
+  nix-update-script,
+  pyserial,
 }:
 
 buildPythonPackage {
   pname = "tinyfpgab";
-  version = "unstable-2018-07-26";
+  version = "0-unstable-2018-07-26";
   format = "setuptools";
 
   src = fetchFromGitHub {
@@ -16,7 +17,7 @@ buildPythonPackage {
     hash = "sha256-j2IP862jEn7W4dnQxoYYai4JIq7n0LGY3dFtcfIJ288=";
   };
 
-  propagatedBuildInputs = [
+  dependencies = [
     pyserial
   ];
 
@@ -24,7 +25,7 @@ buildPythonPackage {
     cd programmer
   '';
 
-  doCheck = false;
+  pythonImportsCheck = [ "tinyfpgab" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 }

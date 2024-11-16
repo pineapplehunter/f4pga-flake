@@ -1,11 +1,12 @@
-{ fetchFromGitHub
-, buildPythonPackage
-, nix-update-script
+{
+  fetchFromGitHub,
+  buildPythonPackage,
+  nix-update-script,
 }:
 
 buildPythonPackage {
   pname = "quicklogic-timings-importer";
-  version = "unstable-2020-06-09";
+  version = "0-unstable-2020-06-09";
   format = "setuptools";
 
   src = fetchFromGitHub {
@@ -16,7 +17,7 @@ buildPythonPackage {
     hash = "sha256-b+qWF7boZo7ZkmRFy/VdKl3mo1wd5PfJuSB7wuQ5BYw=";
   };
 
-  doCheck = false;
+  pythonImportsCheck = [ "quicklogic_timings_importer" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 }

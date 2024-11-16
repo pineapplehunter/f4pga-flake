@@ -1,16 +1,17 @@
-{ fetchFromGitHub
-, buildPythonPackage
-, nix-update-script
-, intervaltree
-, simplejson
-, textx
-, fasm
-, prjxray
+{
+  buildPythonPackage,
+  fasm,
+  fetchFromGitHub,
+  intervaltree,
+  nix-update-script,
+  prjxray,
+  simplejson,
+  textx,
 }:
 
 buildPythonPackage {
   pname = "xc-fasm";
-  version = "unstable-2022-02-28";
+  version = "0-unstable-2022-02-28";
   format = "setuptools";
 
   src = fetchFromGitHub {
@@ -21,15 +22,15 @@ buildPythonPackage {
     hash = "sha256-QzBL759yS2TwWmN0FG+WIWhTjhvzLVSYHatYlQgkxW4=";
   };
 
-  propagatedBuildInputs = [
+  dependencies = [
+    fasm
     intervaltree
+    prjxray
     simplejson
     textx
-    prjxray
-    fasm
   ];
 
-  doCheck = false;
+  pythonImportsCheck = [ "xc_fasm" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 }

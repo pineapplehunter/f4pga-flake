@@ -1,16 +1,13 @@
-{ fetchFromGitHub
-, buildPythonPackage
-, nix-update-script
-, intervaltree
-, simplejson
-, textx
-, fasm
-, prjxray
+{
+  fetchFromGitHub,
+  buildPythonPackage,
+  nix-update-script,
+  fasm,
 }:
 
 buildPythonPackage {
   pname = "qlf-fasm";
-  version = "unstable-2021-06-11";
+  version = "0-unstable-2021-06-11";
   format = "setuptools";
 
   src = fetchFromGitHub {
@@ -20,9 +17,9 @@ buildPythonPackage {
     hash = "sha256-jciXhME/EXV50xBOq2mAfc/bPNEJYZ+TFU7F91wTjfY=";
   };
 
-  propagatedBuildInputs = [ fasm ];
+  dependencies = [ fasm ];
 
-  doCheck = false;
+  pythonImportsCheck = [ "qlf_fasm" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 }

@@ -1,11 +1,12 @@
-{ fetchFromGitHub
-, buildPythonPackage
-, nix-update-script
+{
+  fetchFromGitHub,
+  buildPythonPackage,
+  nix-update-script,
 }:
 
 buildPythonPackage {
   pname = "ql-fasm-utils";
-  version = "unstable-2022-02-28";
+  version = "0-unstable-2021-03-05";
   format = "setuptools";
 
   src = fetchFromGitHub {
@@ -15,7 +16,7 @@ buildPythonPackage {
     hash = "sha256-wHSOU+GaCGZtYqwze8+7fgerJ0aUlpL0NIzcCoQgKU8=";
   };
 
-  doCheck = false;
+  pythonImportsCheck = [ "fasm_utils" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 }

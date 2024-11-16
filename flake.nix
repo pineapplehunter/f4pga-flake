@@ -1,69 +1,125 @@
 {
   description = "A very basic flake";
 
-  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    systems.url = "github:nix-systems/default";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs =
     {
-      overlays.default =
-        final: prev: {
-          python3 = prev.python3.override {
-            packageOverrides = python-self: python-super: {
-              xc-fasm = python-self.callPackage ./python-packages/xc-fasm.nix { };
-              qlf-fasm = python-self.callPackage ./python-packages/qlf-fasm.nix { };
-              ql-fasm = python-self.callPackage ./python-packages/ql-fasm.nix { };
-              ql-fasm-utils = python-self.callPackage ./python-packages/ql-fasm-utils.nix { };
-              f4pga = python-self.callPackage ./python-packages/f4pga.nix { };
-              fasm = python-self.callPackage ./python-packages/fasm.nix { };
-              prjxray = python-self.callPackage ./python-packages/prjxray.nix { };
-              quicklogic-timings-importer = python-self.callPackage ./python-packages/quicklogic-timings-importer.nix { };
-              tinyfpgab = python-self.callPackage ./python-packages/tinyfpgab.nix { };
-            };
-          };
-          prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
-          prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
-          vtr = final.callPackage ./packages/vtr { };
-          f4pga-arch-defs = final.callPackages ./packages/f4pga-arch-defs.nix { };
-        };
+      self,
+      nixpkgs,
+      systems,
+      treefmt-nix,
+    }:
+    let
       lib = nixpkgs.lib;
-    } // (
-      flake-utils.lib.eachDefaultSystem (system:
+      eachSystem = lib.genAttrs (import systems);
+      pkgsFor =
+        system:
+        import nixpkgs {
+          inherit system;
+          overlays = [ self.overlays.default ];
+        };
+    in
+    {
+      overlays.default = final: prev: {
+        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+          (python-final: python-prev: {
+            xc-fasm = python-final.callPackage ./python-packages/xc-fasm.nix { };
+            qlf-fasm = python-final.callPackage ./python-packages/qlf-fasm.nix { };
+            ql-fasm = python-final.callPackage ./python-packages/ql-fasm.nix { };
+            ql-fasm-utils = python-final.callPackage ./python-packages/ql-fasm-utils.nix { };
+            f4pga = python-final.callPackage ./python-packages/f4pga.nix { };
+            fasm = python-final.callPackage ./python-packages/fasm.nix { };
+            prjxray = python-final.callPackage ./python-packages/prjxray.nix { };
+            quicklogic-timings-importer =
+              python-final.callPackage ./python-packages/quicklogic-timings-importer.nix
+                { };
+            tinyfpgab = python-final.callPackage ./python-packages/tinyfpgab.nix { };
+          })
+        ];
+        prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
+        prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
+        vtr = final.callPackage ./packages/vtr { };
+        f4pga-arch-defs = final.callPackages ./packages/f4pga-arch-defs.nix { };
+      };
+
+      packages = eachSystem (
+        system:
         let
-          pkgs = import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          };
-          lib = nixpkgs.lib;
+          pkgs = pkgsFor system;
         in
         {
-          packages = {
-            inherit (pkgs) prjxray-config prjxray-tools vtr;
-            inherit (pkgs.python3.pkgs) f4pga xc-fasm qlf-fasm fasm prjxray quicklogic-timings-importer tinyfpgab;
+          inherit (pkgs)
+            prjxray-config
+            prjxray-tools
+            vtr
+            ;
+          inherit (pkgs.python3.pkgs)
+            f4pga
+            fasm
+            prjxray
+            ql-fasm
+            ql-fasm-utils
+            qlf-fasm
+            quicklogic-timings-importer
+            tinyfpgab
+            xc-fasm
+            ;
+        }
+      );
 
-            update-all = pkgs.writeShellScriptBin "update-all" ''
-              for p in f4pga xc-fasm ql-fasm ql-fasm-utils qlf-fasm fasm prjxray prjxray-config prjxray-tools vtr quicklogic-timings-importer tinyfpgab; do
-                ${lib.getExe pkgs.nix-update} --version=branch --flake $p
-              done
-            '';
+      devShells = eachSystem (
+        system:
+        let
+          pkgs = pkgsFor system;
+        in
+        rec {
+          xc7 = pkgs.callPackage ./env/common.nix { family = "xc7"; };
+          xc7a50t = pkgs.callPackage ./env/common.nix {
+            family = "xc7";
+            allDevices = false;
+            enableXc7a50t = true;
           };
-
-          apps.update = {
-            type = "app";
-            program = lib.getExe self.packages.${system}.update-all;
+          xc7a100t = pkgs.callPackage ./env/common.nix {
+            family = "xc7";
+            allDevices = false;
+            enableXc7a100t = true;
           };
-
-          devShells = rec {
-            xc7 = pkgs.callPackage ./env/common.nix { family = "xc7"; };
-            xc7a50t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a50t = true; };
-            xc7a100t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a100t = true; };
-            xc7a200t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a200t = true; };
-            xc7a010t = pkgs.callPackage ./env/common.nix { family = "xc7"; allDevices = false; enableXc7a010t = true; };
-            eos-s3 = pkgs.callPackage ./env/common.nix { family = "eos-s3"; };
-            ql-eos-s3_wlcsp = pkgs.callPackage ./env/common.nix { family = "eos-s3"; allDevices = false; enableQlEosS3Wlcsp = true; };
-            default = xc7;
+          xc7a200t = pkgs.callPackage ./env/common.nix {
+            family = "xc7";
+            allDevices = false;
+            enableXc7a200t = true;
           };
+          xc7a010t = pkgs.callPackage ./env/common.nix {
+            family = "xc7";
+            allDevices = false;
+            enableXc7a010t = true;
+          };
+          eos-s3 = pkgs.callPackage ./env/common.nix { family = "eos-s3"; };
+          ql-eos-s3_wlcsp = pkgs.callPackage ./env/common.nix {
+            family = "eos-s3";
+            allDevices = false;
+            enableQlEosS3Wlcsp = true;
+          };
+          default = xc7a100t;
+        }
+      );
 
-          formatter = pkgs.nixpkgs-fmt;
-        }));
+      formatter = eachSystem (
+        system:
+        (treefmt-nix.lib.evalModule (pkgsFor system) {
+          projectRootFile = ./flake.nix;
+          programs.nixfmt.enable = true;
+        }).config.build.wrapper
+      );
+
+      legacyPackages = eachSystem pkgsFor;
+    };
 }

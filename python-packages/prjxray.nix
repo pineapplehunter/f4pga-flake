@@ -1,28 +1,29 @@
-{ fetchFromGitHub
-, buildPythonPackage
-, simplejson
-, intervaltree
-, nix-update-script
-, fasm
-, numpy
-, pyjson5
-, pyyaml
+{
+  fetchFromGitHub,
+  buildPythonPackage,
+  simplejson,
+  intervaltree,
+  nix-update-script,
+  fasm,
+  numpy,
+  pyjson5,
+  pyyaml,
 }:
 
 buildPythonPackage {
   pname = "prjxray";
-  version = "unstable-2024-01-13";
+  version = "0.0-583-t1e53270-unstable-2024-09-28";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "f4pga";
     repo = "prjxray";
-    rev = "01ce064d160a9d805366ef3756c40a990165d3a8";
-    hash = "sha256-SWCce7zx11O525Z3T2RUVP0cqYOgGRXXgBnqn8PVVOs=";
+    rev = "f2d21573c7f6bdfa98e86fae5a2f5ef52e23b51c";
+    hash = "sha256-Ld4oo8Ha+78jZZK76KP8W5GObt4LLb3h58OZ9eJDRrQ=";
     fetchSubmodules = true;
   };
 
-  propagatedBuildInputs = [
+  dependencies = [
     fasm
     intervaltree
     numpy
@@ -30,8 +31,6 @@ buildPythonPackage {
     pyyaml
     simplejson
   ];
-
-  doCheck = false;
 
   pythonImportsCheck = [ "prjxray" ];
 

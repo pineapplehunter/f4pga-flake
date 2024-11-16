@@ -1,135 +1,114 @@
-{ fetchFromGitHub
-, clangStdenv
-, python3
-, bison
-, flex
-, cmake
-, tbb_2021_8
-, libX11
-, libXft
-, fontconfig
-, cairo
-, pkg-config
-, gtk3
-, gperftools
-, perl
-, time
-, libXdmcp
-, libxcb
-, wget
-, pcre2
-, pcre
-, util-linux
-, libselinux
-, libsepol
-, libthai
-, libdatrie
-, libxkbcommon
-, libepoxy
-, libXtst
-, tcl
-, readline
-, ninja
-, clang
-, fetchurl
-, capnproto
-, eigen
-, openssl
-, libffi
+{
+  bison,
+  cmake,
+  fetchFromGitHub,
+  fetchurl,
+  flex,
+  lib,
+  libffi,
+  libz,
+  ninja,
+  pkg-config,
+  python3,
+  readline,
+  stdenv,
+  substituteAll,
+  tcl,
+  openssl,
+
+  enableTbb ? true,
+  tbb_2021_11,
+
+  enableEigen ? true,
+  eigen,
+
+  # gui
+  enableX11 ? true,
+  cairo,
+  gtk3,
+  lerc,
+  libX11,
+  libXdmcp,
+  libXtst,
+  libdatrie,
+  libepoxy,
+  libselinux,
+  libsepol,
+  libsysprof-capture,
+  libthai,
+  libuuid,
+  libxkbcommon,
+  pango,
+  pcre2,
 }:
 let
   java-schema = fetchurl rec {
     # master version
-    version = "ed9a67c5fcd46604a88593625a9e38496b83d3ab";
+    version = "b2f7242c2d833eb499fd9734132642d571b02a74";
     url = "https://raw.githubusercontent.com/capnproto/capnproto-java/${version}/compiler/src/main/schema/capnp/java.capnp";
     hash = "sha256-q8SNhZ/6Bqwmx9/mAgN0+w7l76STZwerw1vawiM676s=";
   };
 in
-clangStdenv.mkDerivation rec {
+stdenv.mkDerivation (finalAttrs: {
   pname = "vtr";
-  version = "unstable-2024-01-04";
+  version = "9.0.0-candidate1";
 
   src = fetchFromGitHub {
     owner = "verilog-to-routing";
     repo = "vtr-verilog-to-routing";
-    rev = "69f9ebe5480a4f57335ba12e4788689217ae15b2";
-    hash = "sha256-0/beRWNFkh6eh8BDwfQE5YdUtHDF9IqH+qvVbiU2DVI=";
+    rev = "refs/tags/v${finalAttrs.version}";
+    hash = "sha256-bsf99P6XY7gGiZauLQcOdDR3SxH7lQu31fq1GvWrHmc=";
     fetchSubmodules = true;
   };
 
   patches = [
-    ./nowget.patch
-    ./yosys.patch
-    ./iterator.patch
+    (substituteAll {
+      src = ./nowget.patch;
+      javaschema = java-schema;
+    })
   ];
-
-  cmakeFlags = [ "-DWITH_PARMYS=OFF" ];
 
   nativeBuildInputs = [
-    python3
-    perl
+    (python3.withPackages (ps: with ps; [ prettytable ]))
     bison
-    flex
     cmake
-    pkg-config
-    gperftools
-    time
+    flex
     ninja
-  ] ++ (with python3.pkgs;
-    [
-      pip
-      virtualenv
-      lxml
-      python-utils
-    ]);
-
-  buildInputs = [
-    eigen
-    libXtst
-    libepoxy
-    libxkbcommon
-    libdatrie
-    libthai
-    libsepol
-    libselinux
-    util-linux
-    pcre2
-    pcre
-    fontconfig
-    tbb_2021_8
-    libX11
-    libXft
-    libXdmcp
-    libxcb
-    cairo
-    gtk3
+    pkg-config
     tcl
-    readline
-    openssl
-    libffi
   ];
 
-  postPatch = ''
-    substituteInPlace libs/libvtrcapnproto/CMakeLists.txt \
-      --replace "@java-schema@" ${java-schema}
-    substituteInPlace yosys/Makefile \
-      --replace "@git.rev@" ${src.rev}
+  buildInputs =
+    [
+      libffi
+      libz
+      openssl
+      readline
+    ]
+    ++ lib.optionals enableTbb [ tbb_2021_11 ]
+    ++ lib.optionals enableEigen [ eigen ]
+    ++ lib.optionals enableX11 [
+      cairo
+      gtk3
+      lerc
+      libX11
+      libXdmcp
+      libXtst
+      libdatrie
+      libepoxy
+      libselinux
+      libsepol
+      libsysprof-capture
+      libthai
+      libuuid
+      libxkbcommon
+      pango
+      pcre2
+    ];
 
-    # TODO: fix this upstream
-    # This prevents from opening the link it self
-    substituteInPlace \
-      libs/EXTERNAL/capnproto/c++/src/kj/filesystem-disk-unix.c++ \
-      libs/EXTERNAL/capnproto/c++/ekam-provider/canonical/kj/filesystem-disk-unix.c++ \
-      libs/EXTERNAL/capnproto/c++/ekam-provider/c++header/kj/filesystem-disk-unix.c++ \
-      --replace "AT_SYMLINK_NOFOLLOW" "0"
-  '';
+  doCheck = false;
 
-  postInstall = ''
-    mkdir $out/lib
-    mv $out/bin/*.a $out/lib
-  '';
-
-  doCheck = true;
-
-  passthru = { inherit java-schema; };
-}
+  passthru = {
+    inherit java-schema;
+  };
+})

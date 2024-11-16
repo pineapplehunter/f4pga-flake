@@ -1,25 +1,29 @@
-{ fetchFromGitHub
-, stdenv
-, nix-update-script
-, cmake
-, gflags
-, abseil-cpp
+{
+  fetchFromGitHub,
+  stdenv,
+  nix-update-script,
+  cmake,
+  gflags,
+  abseil-cpp,
 }:
 
-stdenv.mkDerivation rec {
+stdenv.mkDerivation {
   pname = "prjxray-tools";
-  version = "unstable-2024-01-13";
+  version = "0.0-583-t1e53270-unstable-2024-09-28";
 
   src = fetchFromGitHub {
     owner = "f4pga";
     repo = "prjxray";
-    rev = "01ce064d160a9d805366ef3756c40a990165d3a8";
-    hash = "sha256-SWCce7zx11O525Z3T2RUVP0cqYOgGRXXgBnqn8PVVOs=";
+    rev = "f2d21573c7f6bdfa98e86fae5a2f5ef52e23b51c";
+    hash = "sha256-Ld4oo8Ha+78jZZK76KP8W5GObt4LLb3h58OZ9eJDRrQ=";
     fetchSubmodules = true;
   };
 
   nativeBuildInputs = [ cmake ];
-  buildInputs = [ gflags abseil-cpp ];
+  buildInputs = [
+    gflags
+    abseil-cpp
+  ];
 
   dontUseCmakeConfigure = true;
   enableParallelBuilding = true;

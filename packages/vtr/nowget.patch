@@ -17,7 +17,7 @@ index cd97b0ec4..b241a25e0 100644
 -        COMMAND ${WGET}
 -            https://raw.githubusercontent.com/capnproto/capnproto-java/master/compiler/src/main/schema/capnp/java.capnp
 -            -O ${JAVA_SCHEMA}
-+        COMMAND cp -Lv @java-schema@ ${JAVA_SCHEMA}
++        COMMAND cp -Lv @javaschema@ ${JAVA_SCHEMA}
      )
  
      add_custom_target(
