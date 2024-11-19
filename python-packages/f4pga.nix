@@ -50,13 +50,12 @@ buildPythonPackage {
     [
       colorama
       lxml
-      python-constraint
       pyyaml
       simplejson
     ]
     ++ lib.optionals enableXc7 [
       prjxray
-      prjxray-config
+      python-constraint
     ];
 
   postPatch = ''
@@ -70,17 +69,29 @@ buildPythonPackage {
 
   doCheck = true;
 
-  pythonImportsCheck = [ "f4pga" ];
+  pythonImportsCheck =
+    [
+      "f4pga"
+      "f4pga.utils.yosys_split_inouts"
+    ]
+    ++ lib.optionals enableXc7 [
+      "f4pga.utils.xc7.create_place_constraints"
+    ];
 
   postInstall = ''
     for file in $out/bin/*; do
       wrapProgram "$file" \
         --inherit-argv0 \
         --suffix PATH : ${
-          lib.makeBinPath [
-            yosys-with-plugins
-            vtr
-          ]
+          lib.makeBinPath (
+            [
+              yosys-with-plugins
+              vtr
+            ]
+            ++ lib.optionals enableXc7 [
+              prjxray-config
+            ]
+          )
         }
     done
 

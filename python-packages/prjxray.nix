@@ -32,7 +32,10 @@ buildPythonPackage {
     simplejson
   ];
 
-  pythonImportsCheck = [ "prjxray" ];
+  pythonImportsCheck = [
+    "prjxray"
+    "prjxray.fasm_assembler"
+  ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 
