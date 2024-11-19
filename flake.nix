@@ -48,6 +48,7 @@
         prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
         vtr = final.callPackage ./packages/vtr { };
         f4pga-arch-defs = final.callPackages ./packages/f4pga-arch-defs.nix { };
+        f4pga = final.python3Packages.toPythonApplication final.python3Packages.f4pga;
       };
 
       packages = eachSystem (
@@ -57,12 +58,12 @@
         in
         {
           inherit (pkgs)
+            f4pga
             prjxray-config
             prjxray-tools
             vtr
             ;
           inherit (pkgs.python3.pkgs)
-            f4pga
             fasm
             prjxray
             ql-fasm
@@ -108,7 +109,7 @@
             allDevices = false;
             enableQlEosS3Wlcsp = true;
           };
-          default = xc7a100t;
+          default = xc7;
         }
       );
 

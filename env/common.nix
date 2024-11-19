@@ -1,11 +1,10 @@
 {
+  f4pga,
   f4pga-arch-defs,
   lib,
   mkShellNoCC,
-  python3,
   runCommand,
   symlinkJoin,
-  vtr,
 
   family ? "xc7",
   allDevices ? true,
@@ -39,13 +38,7 @@ in
 mkShellNoCC {
   name = "f4pga-${family}-env";
   packages = builtins.attrValues {
-    inherit vtr;
-    python = python3.withPackages (
-      ps:
-      builtins.attrValues {
-        inherit (ps) f4pga ipython;
-      }
-    );
+    inherit f4pga;
   };
 
   FPGA_FAM = family;
