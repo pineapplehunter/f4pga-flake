@@ -108,6 +108,18 @@ stdenv.mkDerivation (finalAttrs: {
 
   doCheck = false;
 
+  postInstall = ''
+    moveToOutput "bin/*.a" $lib
+    cp $lib/bin/* $lib/lib
+    moveToOuput share $dev
+  '';
+
+  outputs = [
+    "out"
+    "lib"
+    "dev"
+  ];
+
   passthru = {
     inherit java-schema;
   };
