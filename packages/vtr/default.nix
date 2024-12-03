@@ -123,4 +123,6 @@ stdenv.mkDerivation (finalAttrs: {
   passthru = {
     inherit java-schema;
   };
+
+  meta.platforms = lib.platforms.linux;
 })

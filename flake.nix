@@ -81,6 +81,14 @@
         }
       );
 
+      checks = eachSystem (
+        system:
+        {
+          vtr-no-gui = self.packages.${system}.vtr.override { enableX11 = false; };
+        }
+        // self.packages.${system}
+      );
+
       devShells = eachSystem (
         system:
         let
@@ -127,6 +135,9 @@
       );
 
       legacyPackages = eachSystem pkgsFor;
-      githubActions = nix-github-actions.lib.mkGithubMatrix { checks = self.checks; };
+
+      githubActions = nix-github-actions.lib.mkGithubMatrix {
+        checks = nixpkgs.lib.getAttrs [ "x86_64-linux" "aarch64-linux" ] self.checks;
+      };
     };
 }
