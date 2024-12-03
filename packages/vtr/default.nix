@@ -96,14 +96,16 @@ stdenv.mkDerivation (finalAttrs: {
       libXtst
       libdatrie
       libepoxy
-      libselinux
-      libsepol
       libsysprof-capture
       libthai
       libuuid
       libxkbcommon
       pango
       pcre2
+    ]
+    ++ lib.optionals (enableX11 && stdenv.hostPlatform.isLinux) [
+      libselinux
+      libsepol
     ];
 
   doCheck = false;
@@ -111,7 +113,7 @@ stdenv.mkDerivation (finalAttrs: {
   postInstall = ''
     moveToOutput "bin/*.a" $lib
     cp $lib/bin/* $lib/lib
-    moveToOuput share $dev
+    moveToOutput share $dev
   '';
 
   outputs = [

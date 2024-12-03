@@ -8,6 +8,10 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-github-actions = {
+      url = "github:nix-community/nix-github-actions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -16,6 +20,7 @@
       nixpkgs,
       systems,
       treefmt-nix,
+      nix-github-actions,
     }:
     let
       lib = nixpkgs.lib;
@@ -113,6 +118,15 @@
         }
       );
 
+      checks = eachSystem (
+        system:
+        {
+          # checks here
+          vtr-no-gui = self.packages.${system}.vtr.override { enableX11 = false; };
+        }
+        // self.packages.${system}
+      );
+
       formatter = eachSystem (
         system:
         (treefmt-nix.lib.evalModule (pkgsFor system) {
@@ -122,5 +136,7 @@
       );
 
       legacyPackages = eachSystem pkgsFor;
+
+      githubActions = nix-github-actions.lib.mkGithubMatrix { checks = self.checks; };
     };
 }
