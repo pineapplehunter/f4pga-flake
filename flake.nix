@@ -8,7 +8,10 @@
       url = "github:numtide/treefmt-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    
+    nix-github-actions = {
+      url = "github:nix-community/nix-github-actions";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -17,6 +20,7 @@
       nixpkgs,
       systems,
       treefmt-nix,
+      nix-github-actions,
     }:
     let
       lib = nixpkgs.lib;
@@ -43,9 +47,7 @@
               python-final.callPackage ./python-packages/quicklogic-timings-importer.nix
                 { };
             tinyfpgab = python-final.callPackage ./python-packages/tinyfpgab.nix { };
-          }):q
-          :q
-          
+          })
         ];
         prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
         prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
@@ -125,5 +127,6 @@
       );
 
       legacyPackages = eachSystem pkgsFor;
+      githubActions = nix-github-actions.lib.mkGithubMatrix { checks = self.checks; };
     };
 }
