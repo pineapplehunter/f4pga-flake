@@ -124,7 +124,7 @@
       formatter = eachSystem (
         system:
         (treefmt-nix.lib.evalModule (pkgsFor system) {
-          projectRootFile = ./flake.nix;
+          projectRootFile = "flake.nix";
           programs.nixfmt.enable = true;
         }).config.build.wrapper
       );

@@ -111,7 +111,7 @@ stdenv.mkDerivation (finalAttrs: {
   postInstall = ''
     moveToOutput "bin/*.a" $lib
     cp $lib/bin/* $lib/lib
-    moveToOuput share $dev
+    moveToOutput share $dev
   '';
 
   outputs = [
