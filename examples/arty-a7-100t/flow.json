@@ -1,0 +1,22 @@
+{
+  "default_part": "XC7A100TCSG324-1",
+  "values": {
+    "top": "top"
+  },
+  "dependencies": {
+    "sources": [
+      "top.v"
+    ],
+    "synth_log": "synth.log",
+    "pack_log": "pack.log"
+  },
+  "XC7A100TCSG324-1": {
+    "default_target": "bitstream",
+    "dependencies": {
+      "build_dir": "build/arty-a7-100t",
+      "xdc": [
+        "arty-a7-100t.xdc"
+      ]
+    }
+  }
+}

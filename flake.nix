@@ -114,6 +114,11 @@
         {
           vtr-no-gui = self.packages.${system}.vtr.override { enableX11 = false; };
           xc7-bitstream = pkgs.callPackage ./tests/xc7-bitstream.nix { };
+          xc7-bitstream-arty-a7-100t = pkgs.callPackage ./tests/xc7-bitstream.nix {
+            archDef = pkgs.f4pga-arch-defs.xc7a100t_test;
+            board = "arty-a7-100t";
+            source = ./examples/arty-a7-100t;
+          };
         }
         // self.packages.${system}
       );

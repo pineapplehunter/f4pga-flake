@@ -22,4 +22,4 @@ Run all package builds and the end-to-end XC7 bitstream test:
 nix flake check -L
 ```
 
-The `xc7-bitstream` check synthesizes, packs, places, routes, and generates a non-empty Arty A7-35T bitstream from [`tests/xc7-bitstream`](tests/xc7-bitstream).
+The `xc7-bitstream` check synthesizes, packs, places, routes, and generates a non-empty Arty A7-35T bitstream from [`tests/xc7-bitstream`](tests/xc7-bitstream). The `xc7-bitstream-arty-a7-100t` check does the same for the [`examples/arty-a7-100t`](examples/arty-a7-100t) example.
