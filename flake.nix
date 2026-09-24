@@ -108,8 +108,12 @@
 
       checks = eachSystem (
         system:
+        let
+          pkgs = pkgsFor system;
+        in
         {
           vtr-no-gui = self.packages.${system}.vtr.override { enableX11 = false; };
+          xc7-bitstream = pkgs.callPackage ./tests/xc7-bitstream.nix { };
         }
         // self.packages.${system}
       );
