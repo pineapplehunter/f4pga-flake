@@ -171,5 +171,5 @@ stdenv.mkDerivation (finalAttrs: {
     inherit java-schema;
   };
 
-  meta.platforms = lib.platforms.linux;
+  meta.platforms = lib.platforms.unix;
 })
