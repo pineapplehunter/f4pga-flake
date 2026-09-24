@@ -49,4 +49,4 @@ jobs:
           server-url: https://niks3.s.ihavenojob.work
 
       - name: Run checks, including bitstream generation
-        run: nix flake check -L
+        run: nix flake check
