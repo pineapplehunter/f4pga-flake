@@ -22,14 +22,12 @@ jobs:
       fail-fast: true
       matrix:
         system:
-          - "aarch64-darwin"
           - "aarch64-linux"
           - "x86_64-linux"
 
     runs-on: >-
       ${{ (matrix.system == 'x86_64-linux' && 'ubuntu-26.04')
-      || (matrix.system == 'aarch64-linux' && 'ubuntu-26.04-arm')
-      || (matrix.system == 'aarch64-darwin' && 'macos-latest') }}
+      || (matrix.system == 'aarch64-linux' && 'ubuntu-26.04-arm') }}
 
     timeout-minutes: 720
 
