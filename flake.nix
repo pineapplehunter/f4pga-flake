@@ -39,25 +39,10 @@
           ];
           prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
           prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
-          vtr = final.callPackage ./packages/vtr { };
-          vtr-f4pga =
-            (final.vtr.override {
-              enableTbb = false;
-              enableX11 = false;
-            }).overrideAttrs
-              (
-                finalAttrs: previousAttrs: {
-                  pname = "vtr-f4pga";
-                  version = "8.0.0-5699-g25e723a24";
-                  src = final.fetchFromGitHub {
-                    owner = "verilog-to-routing";
-                    repo = "vtr-verilog-to-routing";
-                    rev = "25e723a24aa0ae7a0061cd89dd84b1fb62afcc09";
-                    hash = "sha256-q3J89TiwrqsUHs0/H4cBMMDx2Xya8uiXndsUPti5DkA=";
-                    fetchSubmodules = true;
-                  };
-                }
-              );
+          vtr-f4pga = final.callPackage ./packages/vtr {
+            enableTbb = false;
+            enableX11 = false;
+          };
           f4pga-arch-defs = final.callPackages ./packages/f4pga-arch-defs.nix { };
           f4pga = final.python3Packages.toPythonApplication final.python3Packages.f4pga;
         };
@@ -85,7 +70,7 @@
               f4pga
               prjxray-config
               prjxray-tools
-              vtr
+              vtr-f4pga
               ;
             inherit (pkgs.python3.pkgs)
               fasm
@@ -100,7 +85,6 @@
           };
 
           checks = {
-            vtr-no-gui = pkgs.vtr.override { enableX11 = false; };
             xc7-bitstream = pkgs.callPackage ./tests/xc7-bitstream.nix { };
             xc7-bitstream-arty-a7-100t = pkgs.callPackage ./tests/xc7-bitstream.nix {
               archDef = pkgs.f4pga-arch-defs.xc7a100t_test;

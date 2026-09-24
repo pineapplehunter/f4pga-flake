@@ -49,15 +49,15 @@ let
     hash = "sha256-q8SNhZ/6Bqwmx9/mAgN0+w7l76STZwerw1vawiM676s=";
   };
 in
-stdenv.mkDerivation (finalAttrs: {
-  pname = "vtr";
-  version = "9.0.0";
+stdenv.mkDerivation (_finalAttrs: {
+  pname = "vtr-f4pga";
+  version = "8.0.0-5699-g25e723a24";
 
   src = fetchFromGitHub {
     owner = "verilog-to-routing";
     repo = "vtr-verilog-to-routing";
-    rev = "refs/tags/v${finalAttrs.version}";
-    hash = "sha256-g5pDGy6A0e1gHFU64G7NcTAGiUj8vfyhJkQ3++4Y2yw=";
+    rev = "25e723a24aa0ae7a0061cd89dd84b1fb62afcc09";
+    hash = "sha256-q3J89TiwrqsUHs0/H4cBMMDx2Xya8uiXndsUPti5DkA=";
     fetchSubmodules = true;
   };
 
