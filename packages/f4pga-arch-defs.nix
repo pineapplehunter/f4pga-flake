@@ -4,17 +4,17 @@
 }:
 let
   fpga-package-hashes = {
-    "install-xc7" = "sha256-wSA2EFFCylpqcAgkQ7I6f6DUJBygsWWNE4hjADZKqe0=";
-    "xc7a50t_test" = "sha256-oaNXm9AyDGib5jOTL9vqlWB6T+AcjKbDMagVdcvHlx0=";
-    "xc7a100t_test" = "sha256-sMeDW1ts5aaX6pDqdm7ctmL9ARW4Ws85WfLUsf8n/lY=";
-    "xc7a200t_test" = "sha256-hB5v7zPM+PU4AmGTH5DiI0kGvITmUC2Qeg1z42DzDxo=";
-    "xc7z010_test" = "sha256-/pk94lJ/iF6pn4EgweCEUcJFgD4xzwx0s0IjbW+0rcY=";
+    "install-xc7" = "sha256-Qebio1S71y8Uht1soFnJBVSXb0t9dI7jQ2It2ipEXgY=";
+    "xc7a50t_test" = "sha256-Cz/tRG5fqgS1qDTVN9Ym05jMjHC12QZdaz7AbiUt/a8=";
+    "xc7a100t_test" = "sha256-hO8ZffeCcmTku+gASu65HmkgNkw7UZODdxVz94YcfRY=";
+    "xc7a200t_test" = "sha256-LkeuP11YYjO6BQAVdY7A8S20cWqsQFt6nIffHcDUPkw=";
+    "xc7z010_test" = "sha256-Q3AlLsW9p5NScry/43NC8MOMt5jmGbRnf5urKADeNPk=";
     "install-ql" = "sha256-vi96gg86BURdmYP1lMKmVQ99ydaNYpTHISr1pYZUNDE=";
-    "ql-eos-s3_wlcsp" = "sha256-Ropfo/WEsRw7UcP2cbw6BaRsLtD1UXP3IQtxVhB8JC0=";
+    "ql-eos-s3_wlcsp" = "sha256-u+F/kizkj9pED6wo3JSOg6vrtwo2+KGysWAD5u1P2Vo=";
   };
 
-  fpga-timestamp = "20220920-124259";
-  fpga-hash = "007d1c1";
+  fpga-timestamp = "20230411-180123";
+  fpga-hash = "5e974a8";
 
   fetchDefFile =
     name: hash:
