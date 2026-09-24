@@ -106,15 +106,6 @@ stdenv.mkDerivation (finalAttrs: {
         substituteInPlace utils/vqm2blif/src/base/preprocess.h \
           --replace-fail 'bool operator()(char const* a, char const* b) {' 'bool operator()(char const* a, char const* b) const {'
       fi
-
-      # Backport the iterator changes used by newer VTR releases. libc++'s
-      # std::sort requires operations that this legacy proxy iterator lacks,
-      # while std::stable_sort supports the iterator's existing proxy model.
-      if grep -Fq 'std::sort(' libs/librrgraph/src/base/rr_graph_storage.cpp; then
-        substituteInPlace libs/librrgraph/src/base/rr_graph_storage.cpp \
-          --replace-fail $'    edge_sort_iterator& operator++() {' $'    edge_sort_iterator& operator-=(ssize_t n) {\n        swapper_.idx_ -= n;\n        return *this;\n    }\n\n    edge_sort_iterator& operator++() {' \
-          --replace-fail 'std::sort(' 'std::stable_sort('
-      fi
     fi
 
     # Follow Nix store symlinks when determining the mapped file size.
