@@ -25,14 +25,13 @@ buildPythonPackage {
     hash = "sha256-evOtRl2FYa+9VIGpOc9Az7qAHFwt5dmukrpMXPBTZ7o=";
   };
 
-  nativeBuildInputs =
-    [
-      cython
-    ]
-    ++ lib.optionals enableAntlr [
-      cmake
-      jdk
-    ];
+  nativeBuildInputs = [
+    cython
+  ]
+  ++ lib.optionals enableAntlr [
+    cmake
+    jdk
+  ];
 
   buildInputs = lib.optionals enableAntlr [
     antlr4_9

@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs-f4pga.url = "github:nixos/nixpkgs/5e4fbfb6b3de1aa2872b76d49fafc942626e2add";
     systems.url = "github:nix-systems/default-linux";
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
@@ -14,6 +15,7 @@
     {
       self,
       nixpkgs,
+      nixpkgs-f4pga,
       systems,
       treefmt-nix,
     }:
@@ -28,28 +30,56 @@
         };
     in
     {
-      overlays.default = final: prev: {
-        pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
-          (python-final: python-prev: {
-            xc-fasm = python-final.callPackage ./python-packages/xc-fasm.nix { };
-            qlf-fasm = python-final.callPackage ./python-packages/qlf-fasm.nix { };
-            ql-fasm = python-final.callPackage ./python-packages/ql-fasm.nix { };
-            ql-fasm-utils = python-final.callPackage ./python-packages/ql-fasm-utils.nix { };
-            f4pga = python-final.callPackage ./python-packages/f4pga.nix { };
-            fasm = python-final.callPackage ./python-packages/fasm.nix { };
-            prjxray = python-final.callPackage ./python-packages/prjxray.nix { };
-            quicklogic-timings-importer =
-              python-final.callPackage ./python-packages/quicklogic-timings-importer.nix
-                { };
-            tinyfpgab = python-final.callPackage ./python-packages/tinyfpgab.nix { };
-          })
-        ];
-        prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
-        prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
-        vtr = final.callPackage ./packages/vtr { };
-        f4pga-arch-defs = final.callPackages ./packages/f4pga-arch-defs.nix { };
-        f4pga = final.python3Packages.toPythonApplication final.python3Packages.f4pga;
-      };
+      overlays.default =
+        final: prev:
+        let
+          f4pgaToolchain = import nixpkgs-f4pga {
+            system = final.stdenv.hostPlatform.system;
+          };
+        in
+        {
+          pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+            (python-final: python-prev: {
+              xc-fasm = python-final.callPackage ./python-packages/xc-fasm.nix { };
+              qlf-fasm = python-final.callPackage ./python-packages/qlf-fasm.nix { };
+              ql-fasm = python-final.callPackage ./python-packages/ql-fasm.nix { };
+              ql-fasm-utils = python-final.callPackage ./python-packages/ql-fasm-utils.nix { };
+              f4pga = python-final.callPackage ./python-packages/f4pga.nix {
+                vtr = final.vtr-f4pga;
+                yosys = f4pgaToolchain.yosys;
+              };
+              fasm = python-final.callPackage ./python-packages/fasm.nix { };
+              prjxray = python-final.callPackage ./python-packages/prjxray.nix { };
+              quicklogic-timings-importer =
+                python-final.callPackage ./python-packages/quicklogic-timings-importer.nix
+                  { };
+              tinyfpgab = python-final.callPackage ./python-packages/tinyfpgab.nix { };
+            })
+          ];
+          prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
+          prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
+          vtr = final.callPackage ./packages/vtr { };
+          vtr-f4pga =
+            (final.vtr.override {
+              enableTbb = false;
+              enableX11 = false;
+            }).overrideAttrs
+              (
+                finalAttrs: previousAttrs: {
+                  pname = "vtr-f4pga";
+                  version = "8.0.0-5699-g25e723a24";
+                  src = final.fetchFromGitHub {
+                    owner = "verilog-to-routing";
+                    repo = "vtr-verilog-to-routing";
+                    rev = "25e723a24aa0ae7a0061cd89dd84b1fb62afcc09";
+                    hash = "sha256-q3J89TiwrqsUHs0/H4cBMMDx2Xya8uiXndsUPti5DkA=";
+                    fetchSubmodules = true;
+                  };
+                }
+              );
+          f4pga-arch-defs = final.callPackages ./packages/f4pga-arch-defs.nix { };
+          f4pga = final.python3Packages.toPythonApplication final.python3Packages.f4pga;
+        };
 
       packages = eachSystem (
         system:
