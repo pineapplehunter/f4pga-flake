@@ -12,14 +12,14 @@
 
 buildPythonPackage {
   pname = "prjxray";
-  version = "0.0-583-t1e53270-unstable-2024-09-28";
+  version = "0.1-unstable-2025-06-05";
   format = "setuptools";
 
   src = fetchFromGitHub {
     owner = "f4pga";
     repo = "prjxray";
-    rev = "f2d21573c7f6bdfa98e86fae5a2f5ef52e23b51c";
-    hash = "sha256-Ld4oo8Ha+78jZZK76KP8W5GObt4LLb3h58OZ9eJDRrQ=";
+    rev = "c9f02d8576042325425824647ab5555b1bc77833";
+    hash = "sha256-cuqjVLTy9JZxuoD8vPsRfSFCv/HhhSdburx1a9EJajM=";
     fetchSubmodules = true;
   };
 
