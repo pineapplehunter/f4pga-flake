@@ -9,13 +9,13 @@
 
 stdenv.mkDerivation {
   pname = "prjxray-tools";
-  version = "0.0-583-t1e53270-unstable-2024-09-28";
+  version = "0.1-unstable-2025-06-05";
 
   src = fetchFromGitHub {
     owner = "f4pga";
     repo = "prjxray";
-    rev = "f2d21573c7f6bdfa98e86fae5a2f5ef52e23b51c";
-    hash = "sha256-Ld4oo8Ha+78jZZK76KP8W5GObt4LLb3h58OZ9eJDRrQ=";
+    rev = "c9f02d8576042325425824647ab5555b1bc77833";
+    hash = "sha256-cuqjVLTy9JZxuoD8vPsRfSFCv/HhhSdburx1a9EJajM=";
     fetchSubmodules = true;
   };
 
@@ -30,9 +30,12 @@ stdenv.mkDerivation {
 
   postPatch = ''
     substituteInPlace Makefile \
-      --replace "git" "# git" \
-      --replace "\$(MAKE)" "\$(MAKE) -j$NIX_BUILD_CORES" \
-      --replace "cmake" "cmake -DCMAKE_INSTALL_PREFIX:PATH=$out"
+      --replace-fail "git" "# git" \
+      --replace-fail "\$(MAKE)" "\$(MAKE) -j$NIX_BUILD_CORES" \
+      --replace-fail "cmake" "cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_INSTALL_PREFIX:PATH=$out"
+    substituteInPlace CMakeLists.txt \
+      --replace-fail 'add_compile_options(-Wall -Werror)' 'add_compile_options(-Wall)'
+    sed -i '1i#include <cstdint>' lib/include/prjxray/memory_mapped_file.h
   '';
 
   buildFlags = [ "build" ];
