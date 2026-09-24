@@ -7,18 +7,36 @@
   nix-update-script,
   prjxray,
   prjxray-config,
+  prjxray-tools,
   python-constraint,
-  python3,
+  python,
   pyyaml,
   setuptools,
   simplejson,
   stdenv,
   vtr,
+  which,
+  xc-fasm,
   yosys,
 
   enableXc7 ? true,
 }:
 let
+  pythonConstraint = python-constraint.overridePythonAttrs {
+    dontCheckPythonMetadata = true;
+  };
+
+  pythonDependencies = [
+    colorama
+    lxml
+    pyyaml
+    simplejson
+  ]
+  ++ lib.optionals enableXc7 [
+    prjxray
+    pythonConstraint
+  ];
+
   yosys-with-plugins = yosys.withPlugins (
     with yosys.allPlugins;
     [
@@ -46,21 +64,13 @@ buildPythonPackage {
 
   build-system = [ setuptools ];
 
-  dependencies =
-    [
-      colorama
-      lxml
-      pyyaml
-      simplejson
-    ]
-    ++ lib.optionals enableXc7 [
-      prjxray
-      python-constraint
-    ];
+  dependencies = pythonDependencies;
 
   postPatch = ''
     substituteInPlace f4pga/wrappers/sh/__init__.py \
       --replace-fail "/bin/bash" "${stdenv.shell}"
+    substituteInPlace f4pga/flows/commands.py \
+      --replace-fail 'common_sub("which", "python3").decode().replace("\n", "")' '"'"$out/bin/f4pga-python"'"'
   '';
 
   preConfigure = ''
@@ -69,16 +79,18 @@ buildPythonPackage {
 
   doCheck = true;
 
-  pythonImportsCheck =
-    [
-      "f4pga"
-      "f4pga.utils.yosys_split_inouts"
-    ]
-    ++ lib.optionals enableXc7 [
-      "f4pga.utils.xc7.create_place_constraints"
-    ];
+  pythonImportsCheck = [
+    "f4pga"
+    "f4pga.utils.yosys_split_inouts"
+  ]
+  ++ lib.optionals enableXc7 [
+    "f4pga.utils.xc7.create_place_constraints"
+  ];
 
   postInstall = ''
+    makeWrapper ${python.interpreter} $out/bin/f4pga-python \
+      --prefix PYTHONPATH : "$out/${python.sitePackages}:${python.pkgs.makePythonPath pythonDependencies}"
+
     for file in $out/bin/*; do
       wrapProgram "$file" \
         --inherit-argv0 \
@@ -87,18 +99,21 @@ buildPythonPackage {
             [
               yosys-with-plugins
               vtr
+              which
             ]
             ++ lib.optionals enableXc7 [
               prjxray-config
+              prjxray-tools
+              xc-fasm
             ]
           )
         }
     done
 
-    for file in $out/lib/${python3.executable}/site-packages/f4pga/wrappers/sh/**/*.sh; do
+    for file in $out/lib/${python.executable}/site-packages/f4pga/wrappers/sh/**/*.sh; do
       chmod +x "$file"
       wrapProgram "$file" \
-        --suffix PYTHONPATH : "$out/lib/${python3.executable}/site-packages:${simplejson}/lib/${python3.executable}/site-packages"
+        --suffix PYTHONPATH : "$out/lib/${python.executable}/site-packages:${simplejson}/lib/${python.executable}/site-packages"
     done
   '';
 
