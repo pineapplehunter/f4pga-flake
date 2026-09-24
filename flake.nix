@@ -4,6 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     nixpkgs-f4pga.url = "github:nixos/nixpkgs/5e4fbfb6b3de1aa2872b76d49fafc942626e2add";
+    systems.url = "github:nix-systems/default-linux";
     flake-parts.url = "github:hercules-ci/flake-parts";
   };
 
@@ -38,9 +39,7 @@
           ];
           prjxray-config = final.callPackage ./packages/prjxray-config.nix { };
           prjxray-tools = final.callPackage ./packages/prjxray-tools.nix { };
-          vtr = final.callPackage ./packages/vtr {
-            enableX11 = final.stdenv.hostPlatform.isLinux;
-          };
+          vtr = final.callPackage ./packages/vtr { };
           vtr-f4pga =
             (final.vtr.override {
               enableTbb = false;
@@ -64,11 +63,7 @@
         };
     in
     flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "aarch64-darwin"
-        "aarch64-linux"
-        "x86_64-linux"
-      ];
+      systems = import inputs.systems;
 
       flake.overlays.default = overlay;
 
