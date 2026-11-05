@@ -1,0 +1,13 @@
+GCC 15 no longer provides <cstdint> through transitive includes.
+
+diff --git a/libs/json11/json11.cpp b/libs/json11/json11.cpp
+--- a/libs/json11/json11.cpp
++++ b/libs/json11/json11.cpp
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "json11.hpp"
++#include <cstdint>
+ #include <cassert>
+ #include <cmath>
+ #include <cstdlib>

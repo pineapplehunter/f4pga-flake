@@ -75,6 +75,17 @@ A clean build of this small example takes approximately two minutes on a modern 
 
 ### Program the FPGA
 
+To build and load the example in one command, connect and power the Arty A7-100T,
+then run from the repository root:
+
+```shell
+nix run .#arty-a7-100t-demo
+```
+
+This uses the packaged bitstream and openFPGALoader to program volatile FPGA
+memory, not configuration flash. The design is lost when power is removed.
+Run it on the host with USB access; Linux may require openFPGALoader udev rules.
+
 With [openFPGALoader](https://github.com/trabucayre/openFPGALoader) installed and the board connected, load the bitstream into volatile FPGA memory:
 
 ```shell
@@ -115,7 +126,7 @@ The checks include:
 ## Known limitations
 
 - This project is experimental and primarily tested on `x86_64-linux`.
-- F4PGA currently requires compatibility-pinned Yosys and VTR versions for the packaged architecture data.
+- F4PGA uses compatibility-pinned Yosys 0.47 (`yosys-f4pga`) and VTR source versions for the packaged architecture data. Both are built with the main `nixos-unstable` input's compiler and dependencies; no separate old nixpkgs input is needed.
 - Only the Arty A7-35T and Arty A7-100T flows have end-to-end bitstream checks.
 - Hardware programming tools are not included in the development shells.
 - Device support and programming procedures vary; consult the board and tool documentation before programming hardware.
