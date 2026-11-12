@@ -1,0 +1,17 @@
+Yosys 0.47 returns constant bits by value from operator[]. Use the mutable
+bits() accessor when updating the inversion mask.
+
+--- a/integrateinv-plugin/integrateinv.cc
++++ b/integrateinv-plugin/integrateinv.cc
+@@ -247,9 +247,9 @@
+ 
+                     // Toggle bit in the control parameter bitmask
+                     if (invMask[pin.bit] == RTLIL::State::S0) {
+-                        invMask[pin.bit] = RTLIL::State::S1;
++                        invMask.bits()[pin.bit] = RTLIL::State::S1;
+                     } else if (invMask[pin.bit] == RTLIL::State::S1) {
+-                        invMask[pin.bit] = RTLIL::State::S0;
++                        invMask.bits()[pin.bit] = RTLIL::State::S0;
+                     } else {
+                         log_error("The inversion parameter must contain only 0s and 1s (%s "
+                                   "parameter %s)\n",

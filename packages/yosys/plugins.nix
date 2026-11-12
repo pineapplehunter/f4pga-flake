@@ -45,6 +45,7 @@ lib.genAttrs plugins (
   stdenv.mkDerivation {
     pname = "yosys-symbiflow-${plugin}-plugin";
     inherit src version plugin;
+    patches = lib.optional (plugin == "integrateinv") ./integrateinv-yosys-0.47.patch;
     strictDeps = true;
     __structuredAttrs = true;
     enableParallelBuilding = true;
