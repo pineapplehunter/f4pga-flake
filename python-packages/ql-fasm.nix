@@ -1,4 +1,5 @@
 {
+  lib,
   buildPythonPackage,
   fasm,
   fetchFromGitHub,
@@ -8,9 +9,9 @@
 }:
 
 buildPythonPackage {
-  pname = "ql-fasm";
+  pname = "quicklogic-fasm";
   version = "0-unstable-2020-07-14";
-  format = "setuptools";
+  pyproject = true;
 
   src = fetchFromGitHub {
     owner = "antmicro";
@@ -19,6 +20,8 @@ buildPythonPackage {
     fetchSubmodules = true;
     hash = "sha256-cDscgsOswTowFCmd7cUDesKDqfA8zt9u4wFPfZaPESE=";
   };
+
+  build-system = [ setuptools ];
 
   dependencies = [
     fasm
@@ -29,4 +32,11 @@ buildPythonPackage {
   pythonImportsCheck = [ "quicklogic_fasm" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
+
+  meta = {
+    description = "FASM bitstream generator for QuickLogic FPGAs";
+    homepage = "https://github.com/antmicro/quicklogic-fasm";
+    license = lib.licenses.asl20;
+    mainProgram = "qlfasm";
+  };
 }
