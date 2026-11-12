@@ -34,7 +34,7 @@ Run the package for the target chip directly; no development shell or environmen
 
 ```shell
 cd examples/arty-a7-100t
-nix run github:pineapplehunter/f4pga-flake#f4pga-xc7a100t -- build --flow flow.json
+nix run github:pineapplehunter/f4pga-flake#f4pga-xc7a100t -- -v build --flow flow.json
 ```
 
 The generated bitstream is written to:
@@ -62,7 +62,7 @@ Each package wraps the shared F4PGA toolchain with the chip's architecture data 
 | `f4pga-xc7z010` | XC7Z010 |
 | `f4pga-eos-s3` | QuickLogic EOS S3, using the packaged `ql-eos-s3_wlcsp` bundle |
 
-Use `nix run <flake>#<package> -- build --flow flow.json` from your project directory. Arguments are passed unchanged to F4PGA. Your flow still specifies the FPGA part/package, sources, and constraints; the launcher does not supply board pin assignments or change the selected part.
+Use `nix run <flake>#<package> -- -v build --flow flow.json` from your project directory. Arguments are passed unchanged to F4PGA. Your flow still specifies the FPGA part/package, sources, and constraints; the launcher does not supply board pin assignments or change the selected part.
 
 There are no family-wide launchers or development shells. The unconfigured `f4pga` package remains available for custom integrations that supply their own architecture data and environment.
 

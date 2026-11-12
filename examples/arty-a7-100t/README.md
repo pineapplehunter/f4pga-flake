@@ -20,10 +20,10 @@ Run all commands below from this example directory (`examples/arty-a7-100t`). Th
 ## Generate the bitstream
 
 ```shell
-nix run github:pineapplehunter/f4pga-flake#f4pga-xc7a100t -- build --flow flow.json
+nix run github:pineapplehunter/f4pga-flake#f4pga-xc7a100t -- -v build --flow flow.json
 ```
 
-The first run downloads the toolchain and architecture data. The output file, relative to this example directory, is:
+The `-v` flag enables verbose progress output. The first run downloads the toolchain and architecture data. The output file, relative to this example directory, is:
 
 ```text
 build/arty-a7-100t/top.bit
