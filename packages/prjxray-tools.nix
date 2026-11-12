@@ -1,15 +1,19 @@
 {
-  fetchFromGitHub,
+  lib,
   stdenv,
-  nix-update-script,
+  fetchFromGitHub,
+  abseil-cpp,
   cmake,
   gflags,
-  abseil-cpp,
+  nix-update-script,
 }:
 
 stdenv.mkDerivation {
   pname = "prjxray-tools";
   version = "0.1-unstable-2025-06-05";
+
+  strictDeps = true;
+  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "f4pga";
@@ -25,23 +29,18 @@ stdenv.mkDerivation {
     abseil-cpp
   ];
 
-  dontUseCmakeConfigure = true;
-  enableParallelBuilding = true;
+  patches = [ ./prjxray-tools-compiler-compat.patch ];
 
-  postPatch = ''
-    substituteInPlace Makefile \
-      --replace-fail "git" "# git" \
-      --replace-fail "\$(MAKE)" "\$(MAKE) -j$NIX_BUILD_CORES" \
-      --replace-fail "cmake" "cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_INSTALL_PREFIX:PATH=$out"
-    substituteInPlace CMakeLists.txt \
-      --replace-fail 'add_compile_options(-Wall -Werror)' 'add_compile_options(-Wall)'
-    sed -i '1i#include <cstdint>' lib/include/prjxray/memory_mapped_file.h
-  '';
-
-  buildFlags = [ "build" ];
+  cmakeFlags = [ (lib.cmakeFeature "CMAKE_POLICY_VERSION_MINIMUM" "3.5") ];
 
   passthru.updateScript = nix-update-script {
     extraArgs = [ "--version=branch" ];
   };
 
+  meta = {
+    description = "Native tools for the Project X-Ray Xilinx 7-series database";
+    homepage = "https://github.com/f4pga/prjxray";
+    license = lib.licenses.isc;
+    platforms = lib.platforms.linux;
+  };
 }
