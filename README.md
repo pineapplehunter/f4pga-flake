@@ -27,7 +27,9 @@ The packaged architecture data covers:
 - QuickLogic EOS S3 devices
 - Arty A7-35T and Arty A7-100T end-to-end example builds
 
-Support depends on the available F4PGA architecture definitions and does not imply that every device or board in a family has been tested.
+The F4PGA package includes Xilinx and QuickLogic runtime tools by default. Architecture bundles are currently provided for the families listed above; other upstream targets need matching architecture data and tool/plugin compatibility checks.
+
+Software checks can generate bitstreams without a physical board. They do not establish that a bitstream works on hardware, and not every device or board in a family has been tested.
 
 ## Quick start
 
@@ -48,6 +50,8 @@ build/arty-a7-100t/top.bit
 ## Arty A7-100T example
 
 The [`examples/arty-a7-100t`](examples/arty-a7-100t) directory contains a complete minimal design for the `XC7A100TCSG324-1` device.
+
+This example has been tested successfully on a physical Arty A7-100T board. This confirms that sample on that board, not hardware validation of every supported target.
 
 ### Design and constraints
 
@@ -120,13 +124,16 @@ nix flake check -L
 
 The checks include:
 
+- `f4pga-packaging`: checks packaged-tool precedence, child Python environments, and Xilinx/QuickLogic command-line entry points without architecture downloads or hardware
 - `xc7-bitstream`: generates a non-empty Arty A7-35T bitstream
 - `xc7-bitstream-arty-a7-100t`: generates a non-empty bitstream from the Arty A7-100T example
+- `eos-s3-bitstream`: generates a non-empty EOS S3 PD64 bitstream from a small combinational design; its pin constraints are a software test, not board wiring instructions
 
 ## Known limitations
 
 - This project is experimental and primarily tested on `x86_64-linux`.
 - F4PGA uses compatibility-pinned Yosys 0.47 (`yosys-f4pga`) and VTR source versions for the packaged architecture data. Both are built with the main `nixos-unstable` input's compiler and dependencies; no separate old nixpkgs input is needed.
-- Only the Arty A7-35T and Arty A7-100T flows have end-to-end bitstream checks.
+- End-to-end bitstream checks cover Arty A7-35T, Arty A7-100T, and EOS S3 PD64, not every device/package. QLF-K4N8 has no packaged architecture bundle, and its `ql-qlf` plugin is not yet supported by this pinned toolchain.
+- Package builds and bitstream generation are software validation, not confirmation that every board works. Hardware validation is separate and is not required to run the checks.
 - Hardware programming tools are not included in the development shells.
 - Device support and programming procedures vary; consult the board and tool documentation before programming hardware.
