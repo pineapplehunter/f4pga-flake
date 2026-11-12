@@ -9,6 +9,8 @@ An LED blinker for the Arty A7-100T's `XC7A100TCSG324-1` FPGA. This example has 
 
 Generating a bitstream does not require a board. No development shell or manual F4PGA environment setup is needed.
 
+Run all commands below from this example directory (`examples/arty-a7-100t`). The commands use the toolchain published by `github:pineapplehunter/f4pga-flake`.
+
 ## Design and constraints
 
 - [`top.v`](top.v) increments a 26-bit counter using the board's 100 MHz clock. The most significant bit drives the LED.
@@ -17,11 +19,8 @@ Generating a bitstream does not require a board. No development shell or manual 
 
 ## Generate the bitstream
 
-Starting at the repository root:
-
 ```shell
-cd examples/arty-a7-100t
-nix run ../..#f4pga-xc7a100t -- build --flow flow.json
+nix run github:pineapplehunter/f4pga-flake#f4pga-xc7a100t -- build --flow flow.json
 ```
 
 The first run downloads the toolchain and architecture data. The output file, relative to this example directory, is:
@@ -38,7 +37,7 @@ test -s build/arty-a7-100t/top.bit && echo "Bitstream generated"
 
 ## Write the generated bitstream to the FPGA
 
-Connect and power the board. From **this example directory**, load the file you generated above using [openFPGALoader](https://github.com/trabucayre/openFPGALoader):
+Connect and power the board, then load the file you generated above using [openFPGALoader](https://github.com/trabucayre/openFPGALoader):
 
 ```shell
 nix run nixpkgs#openfpgaloader -- \
@@ -57,16 +56,10 @@ Run programming commands on the host with USB access. If access is denied on Lin
 
 ## Build and program in one command
 
-Alternatively, from the **repository root**:
+Alternatively, build and program directly:
 
 ```shell
-nix run .#arty-a7-100t-demo
-```
-
-Or, from **this example directory**:
-
-```shell
-nix run ../..#arty-a7-100t-demo
+nix run github:pineapplehunter/f4pga-flake#arty-a7-100t-demo
 ```
 
 This builds the example through Nix and invokes the packaged openFPGALoader. It loads the Nix-built bitstream, **not** the file in your local `build/` directory. It also programs volatile FPGA memory only.

@@ -34,7 +34,7 @@ Run the package for the target chip directly; no development shell or environmen
 
 ```shell
 cd examples/arty-a7-100t
-nix run ../..#f4pga-xc7a100t -- build --flow flow.json
+nix run github:pineapplehunter/f4pga-flake#f4pga-xc7a100t -- build --flow flow.json
 ```
 
 The generated bitstream is written to:
