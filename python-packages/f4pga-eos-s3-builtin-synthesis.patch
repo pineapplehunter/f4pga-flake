@@ -1,0 +1,14 @@
+Yosys 0.47 provides synth_quicklogic -family pp3 itself. EOS-S3 does not
+need the old ql-qlf synthesis plugin, which is incompatible with this Yosys.
+Keep ql-iob for the QuickLogic I/O passes used later in the flow.
+
+--- a/f4pga/wrappers/tcl/eos-s3.f4pga.tcl
++++ b/f4pga/wrappers/tcl/eos-s3.f4pga.tcl
+@@ -1,7 +1,6 @@
+ yosys -import
+ 
+ plugin -i ql-iob
+-plugin -i ql-qlf
+ 
+ yosys -import
+ 

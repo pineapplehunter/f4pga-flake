@@ -1,0 +1,26 @@
+Preserve the caller's environment when adding stage-specific variables.
+Keep the packaged PATH and append the inherited PYTHONPATH to any
+stage-specific Python search path so child interpreters can import f4pga.
+
+--- a/f4pga/flows/modules/generic_script_wrapper.py
++++ b/f4pga/flows/modules/generic_script_wrapper.py
+@@ -56,6 +56,7 @@
+ 
+ # TODO: `environment` input kind
+ 
++from os import environ, pathsep
+ from pathlib import Path
+ from re import match as re_match, finditer as re_finditer
+ 
+@@ -306,7 +307,10 @@
+             get_env(ctx)
+             if len(env_vars.items()) == 0:
+                 return None
+-            return env_vars
++            child_env = {**environ, **env_vars}
++            if env_vars.get("PYTHONPATH") and environ.get("PYTHONPATH"):
++                child_env["PYTHONPATH"] += pathsep + environ["PYTHONPATH"]
++            return child_env
+ 
+         setattr(self, "get_args", get_all_args)
+         setattr(self, "get_env", get_all_env)
