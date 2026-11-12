@@ -7,6 +7,11 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+    inputs:
+      full_tests:
+        description: Run all bitstream checks (downloads additional architecture data)
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -46,5 +51,9 @@ jobs:
         with:
           server-url: https://niks3.s.ihavenojob.work
 
-      - name: Run checks, including bitstream generation
-        run: nix flake check
+      - name: Run CI checks (packaging and XC7A35T bitstream)
+        run: nix flake check -L
+
+      - name: Run full test suite
+        if: github.event_name == 'workflow_dispatch' && inputs.full_tests
+        run: nix build --no-link -L .#tests-full

@@ -70,19 +70,31 @@
           system,
           ...
         }:
+        let
+          extraChecks = {
+            eos-s3-bitstream = pkgs.callPackage ./tests/eos-s3-bitstream.nix { };
+            xc7-bitstream-arty-a7-100t = pkgs.callPackage ./tests/xc7-bitstream.nix {
+              configuredF4pga = pkgs.f4pga-xc7a100t;
+              board = "arty-a7-100t";
+              source = ./examples/arty-a7-100t;
+            };
+          };
+        in
         {
           _module.args.pkgs = import inputs.nixpkgs {
             inherit system;
             overlays = [ overlay ];
           };
 
-          packages = {
+          packages = extraChecks // {
+            tests-full = pkgs.linkFarm "f4pga-tests-full" (config.checks // extraChecks);
+
             arty-a7-100t-demo = pkgs.writeShellApplication {
               name = "arty-a7-100t-demo";
               runtimeInputs = [ pkgs.openfpgaloader ];
               text = ''
                 exec openFPGALoader -b arty_a7_100t \
-                  ${config.checks.xc7-bitstream-arty-a7-100t}/top.bit
+                  ${extraChecks.xc7-bitstream-arty-a7-100t}/top.bit
               '';
             };
 
@@ -111,17 +123,11 @@
               ;
           };
 
+          # Keep default CI limited to the XC7A35T architecture bundle.
           checks = {
             f4pga-packaging = pkgs.callPackage ./tests/f4pga-packaging.nix { };
-            eos-s3-bitstream = pkgs.callPackage ./tests/eos-s3-bitstream.nix { };
             xc7-bitstream = pkgs.callPackage ./tests/xc7-bitstream.nix { };
-            xc7-bitstream-arty-a7-100t = pkgs.callPackage ./tests/xc7-bitstream.nix {
-              configuredF4pga = pkgs.f4pga-xc7a100t;
-              board = "arty-a7-100t";
-              source = ./examples/arty-a7-100t;
-            };
-          }
-          // config.packages;
+          };
 
           formatter = pkgs.nixfmt-tree;
 

@@ -115,18 +115,33 @@ There are no family-wide launchers or development shells. The unconfigured `f4pg
 
 ## Verification
 
-Run all package builds and end-to-end checks with:
+### Default CI suite
 
 ```shell
 nix flake check -L
 ```
 
-The checks include:
+Normal CI builds only these checks and their dependencies, not every exported package:
 
 - `f4pga-packaging`: checks packaged-tool precedence, child Python environments, and Xilinx/QuickLogic command-line entry points without architecture downloads or hardware
-- `xc7-bitstream`: generates a non-empty Arty A7-35T bitstream
+- `xc7-bitstream`: generates a non-empty Arty A7-35T bitstream using the shared XC7A35T/XC7A50T bundle
+
+This does not download the XC7A100T, XC7A200T, XC7Z010, or EOS S3 architecture bundles. Flake evaluation still validates all package definitions.
+
+### Full suite (opt-in)
+
+```shell
+nix build --no-link -L .#tests-full
+```
+
+The full suite includes both CI checks plus these additional bitstream checks and their architecture downloads:
+
 - `xc7-bitstream-arty-a7-100t`: generates a non-empty bitstream from the Arty A7-100T example
-- `eos-s3-bitstream`: generates a non-empty EOS S3 PD64 bitstream from a small combinational design; its pin constraints are a software test, not board wiring instructions
+- `eos-s3-bitstream`: checks EOS S3 PD64 bitstream generation from a small combinational design; its pin constraints are a software test, not board wiring instructions
+
+Run either additional check individually with `nix build --no-link -L .#<check-name>`. The full suite covers all existing bitstream tests, not every packaged chip. To run it in GitHub Actions, manually dispatch the CI workflow with `full_tests` enabled.
+
+The EOS S3 check currently fails because the packaged `qlfasm` version lacks the `--dev-type` option expected by F4PGA; the full suite will fail until that compatibility issue is fixed.
 
 ## Known limitations
 
