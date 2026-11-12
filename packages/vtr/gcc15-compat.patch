@@ -1,0 +1,103 @@
+GCC 15 no longer provides these transitive standard-library includes.
+Also make the string comparator callable through a const reference.
+
+--- a/libs/EXTERNAL/libyosys/libs/json11/json11.cpp
++++ b/libs/EXTERNAL/libyosys/libs/json11/json11.cpp
+@@ -20,6 +20,7 @@
+  */
+ 
+ #include "json11.hpp"
++#include <cstdint>
+ #include <cassert>
+ #include <cmath>
+ #include <cstdlib>
+--- a/libs/librtlnumber/src/include/rtl_utils.hpp
++++ b/libs/librtlnumber/src/include/rtl_utils.hpp
+@@ -13,6 +13,7 @@
+ #include <iostream>
+ 
+ #include <string.h>
++#include <cstdint>
+ 
+ #ifndef FILE_NAME
+ #    define FILE_NAME (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+--- a/libs/EXTERNAL/libcatch2/src/catch2/catch_test_case_info.hpp
++++ b/libs/EXTERNAL/libcatch2/src/catch2/catch_test_case_info.hpp
+@@ -15,6 +15,7 @@
+ #include <catch2/internal/catch_unique_ptr.hpp>
+ 
+ 
++#include <cstdint>
+ #include <string>
+ #include <vector>
+ 
+--- a/libs/EXTERNAL/libcatch2/src/catch2/internal/catch_xmlwriter.cpp
++++ b/libs/EXTERNAL/libcatch2/src/catch2/internal/catch_xmlwriter.cpp
+@@ -11,6 +11,7 @@
+ #include <catch2/internal/catch_enforce.hpp>
+ #include <catch2/internal/catch_xmlwriter.hpp>
+ 
++#include <cstdint>
+ #include <iomanip>
+ #include <type_traits>
+ 
+--- a/libs/libvtrutil/src/vtr_string_interning.h
++++ b/libs/libvtrutil/src/vtr_string_interning.h
+@@ -1,3 +1,4 @@
++#include <cstdint>
+ #ifndef VTR_STRING_INTERNING_H_
+ #define VTR_STRING_INTERNING_H_
+ 
+--- a/libs/librrgraph/src/base/rr_node_types.h
++++ b/libs/librrgraph/src/base/rr_node_types.h
+@@ -1,3 +1,4 @@
++#include <cstdint>
+ #ifndef RR_NODE_TYPES_H
+ #define RR_NODE_TYPES_H
+ 
+--- a/libs/libarchfpga/src/arch_check.h
++++ b/libs/libarchfpga/src/arch_check.h
+@@ -1,3 +1,4 @@
++#include <cstdint>
+ #ifndef ARCH_CHECK_H
+ #define ARCH_CHECK_H
+ 
+--- a/libs/libarchfpga/src/arch_check.cpp
++++ b/libs/libarchfpga/src/arch_check.cpp
+@@ -1,3 +1,4 @@
++#include <sstream>
+ #include <set>
+ 
+ #include "vtr_log.h"
+--- a/libs/libarchfpga/src/read_fpga_interchange_arch.cpp
++++ b/libs/libarchfpga/src/read_fpga_interchange_arch.cpp
+@@ -1,3 +1,4 @@
++#include <sstream>
+ #include <algorithm>
+ #include <kj/std/iostream.h>
+ #include <limits>
+--- a/vpr/src/base/read_interchange_netlist.cpp
++++ b/vpr/src/base/read_interchange_netlist.cpp
+@@ -1,3 +1,4 @@
++#include <sstream>
+ /**
+  * @file
+  * @brief FPGA Interchange Netlist Loader
+--- a/vpr/src/base/vpr_types.cpp
++++ b/vpr/src/base/vpr_types.cpp
+@@ -1,3 +1,4 @@
++#include <sstream>
+ #include <cmath>
+ #include "vpr_types.h"
+ #include "globals.h"
+--- a/utils/vqm2blif/src/base/preprocess.h
++++ b/utils/vqm2blif/src/base/preprocess.h
+@@ -27,7 +27,7 @@
+ 
+ 
+ struct cmp_str {
+-    bool operator()(char const* a, char const* b) {
++    bool operator()(char const* a, char const* b) const {
+         return strcmp(a, b) < 0;
+     }
+ };
