@@ -1,6 +1,6 @@
-# F4PGA environment in Nix
+# F4PGA in Nix
 
-A reproducible Nix environment for building FPGA bitstreams with F4PGA.
+Reproducible, per-chip Nix packages for building FPGA bitstreams with F4PGA.
 
 - [Overview](#overview)
 - [Supported targets](#supported-targets)
@@ -9,7 +9,7 @@ A reproducible Nix environment for building FPGA bitstreams with F4PGA.
   - [Design and constraints](#design-and-constraints)
   - [Generate the bitstream](#generate-the-bitstream)
   - [Program the FPGA](#program-the-fpga)
-- [Development shells](#development-shells)
+- [Configured packages](#configured-packages)
 - [Verification](#verification)
 - [Known limitations](#known-limitations)
 
@@ -33,12 +33,11 @@ Software checks can generate bitstreams without a physical board. They do not es
 
 ## Quick start
 
-Enter the development shell for the target device and run the F4PGA flow:
+Run the package for the target chip directly; no development shell or environment setup is needed. From the repository root:
 
 ```shell
-nix develop .#xc7a100t
 cd examples/arty-a7-100t
-f4pga build --flow flow.json
+nix run ../..#f4pga-xc7a100t -- build --flow flow.json
 ```
 
 The generated bitstream is written to:
@@ -70,9 +69,8 @@ This example has been tested successfully on a physical Arty A7-100T board. This
 From the repository root:
 
 ```shell
-nix develop .#xc7a100t
 cd examples/arty-a7-100t
-f4pga build --flow flow.json
+nix run ../..#f4pga-xc7a100t -- build --flow flow.json
 ```
 
 A clean build of this small example takes approximately two minutes on a modern laptop, excluding the initial Nix downloads.
@@ -98,21 +96,22 @@ openFPGALoader -b arty_a7_100t build/arty-a7-100t/top.bit
 
 The LED connected to `H5` should blink. Programming commands differ by device, board, programmer, and whether the design is loaded into volatile memory or persistent configuration flash.
 
-## Development shells
+## Configured packages
 
-Use the smallest shell matching the intended target:
+Each package wraps the shared F4PGA toolchain with the chip's architecture data and sets `FPGA_FAM`, `F4PGA_INSTALL_DIR`, `F4PGA_TIMESTAMP`, and `F4PGA_HASH` automatically.
 
-| Shell | Target |
+| Package | Target |
 | --- | --- |
-| `xc7` | All packaged Xilinx 7-series definitions |
-| `xc7a50t` | XC7A35T/XC7A50T architecture bundle |
-| `xc7a100t` | XC7A100T architecture data |
-| `xc7a200t` | XC7A200T architecture data |
-| `xc7a010t` | Packaged XC7Z010 architecture data |
-| `eos-s3` | QuickLogic EOS S3 definitions |
-| `ql-eos-s3_wlcsp` | QuickLogic EOS S3 WLCSP target |
+| `f4pga-xc7a35t` | XC7A35T, using the shared XC7A35T/XC7A50T bundle |
+| `f4pga-xc7a50t` | XC7A50T, using the shared XC7A35T/XC7A50T bundle |
+| `f4pga-xc7a100t` | XC7A100T |
+| `f4pga-xc7a200t` | XC7A200T |
+| `f4pga-xc7z010` | XC7Z010 |
+| `f4pga-eos-s3` | QuickLogic EOS S3, using the packaged `ql-eos-s3_wlcsp` bundle |
 
-Enter a shell with `nix develop .#<shell>`.
+Use `nix run <flake>#<package> -- build --flow flow.json` from your project directory. Arguments are passed unchanged to F4PGA. Your flow still specifies the FPGA part/package, sources, and constraints; the launcher does not supply board pin assignments or change the selected part.
+
+There are no family-wide launchers or development shells. The unconfigured `f4pga` package remains available for custom integrations that supply their own architecture data and environment.
 
 ## Verification
 
@@ -135,5 +134,5 @@ The checks include:
 - F4PGA uses compatibility-pinned Yosys 0.47 (`yosys-f4pga`) and VTR source versions for the packaged architecture data. Both are built with the main `nixos-unstable` input's compiler and dependencies; no separate old nixpkgs input is needed.
 - End-to-end bitstream checks cover Arty A7-35T, Arty A7-100T, and EOS S3 PD64, not every device/package. QLF-K4N8 has no packaged architecture bundle, and its `ql-qlf` plugin is not yet supported by this pinned toolchain.
 - Package builds and bitstream generation are software validation, not confirmation that every board works. Hardware validation is separate and is not required to run the checks.
-- Hardware programming tools are not included in the development shells.
+- Chip launchers generate bitstreams; they do not include hardware programming tools. The separate `arty-a7-100t-demo` command includes openFPGALoader.
 - Device support and programming procedures vary; consult the board and tool documentation before programming hardware.
