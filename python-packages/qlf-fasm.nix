@@ -1,14 +1,16 @@
 {
-  fetchFromGitHub,
+  lib,
   buildPythonPackage,
-  nix-update-script,
   fasm,
+  fetchFromGitHub,
+  nix-update-script,
+  setuptools,
 }:
 
 buildPythonPackage {
   pname = "qlf-fasm";
   version = "0-unstable-2021-06-11";
-  format = "setuptools";
+  pyproject = true;
 
   src = fetchFromGitHub {
     owner = "QuickLogic-Corp";
@@ -17,9 +19,17 @@ buildPythonPackage {
     hash = "sha256-jciXhME/EXV50xBOq2mAfc/bPNEJYZ+TFU7F91wTjfY=";
   };
 
+  build-system = [ setuptools ];
+
   dependencies = [ fasm ];
 
   pythonImportsCheck = [ "qlf_fasm" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
+
+  meta = {
+    description = "FASM support for QuickLogic FPGAs";
+    homepage = "https://github.com/QuickLogic-Corp/ql_fasm";
+    license = lib.licenses.asl20;
+  };
 }
