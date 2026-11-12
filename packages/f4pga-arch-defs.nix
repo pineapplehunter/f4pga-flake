@@ -3,7 +3,8 @@
   fetchzip,
 }:
 let
-  fpga-package-hashes = {
+  # These artifacts and the pinned VTR/Yosys packages form a compatible toolchain.
+  deviceHashes = {
     "install-xc7" = "sha256-Qebio1S71y8Uht1soFnJBVSXb0t9dI7jQ2It2ipEXgY=";
     "xc7a50t_test" = "sha256-Cz/tRG5fqgS1qDTVN9Ym05jMjHC12QZdaz7AbiUt/a8=";
     "xc7a100t_test" = "sha256-hO8ZffeCcmTku+gASu65HmkgNkw7UZODdxVz94YcfRY=";
@@ -13,21 +14,20 @@ let
     "ql-eos-s3_wlcsp" = "sha256-u+F/kizkj9pED6wo3JSOg6vrtwo2+KGysWAD5u1P2Vo=";
   };
 
-  fpga-timestamp = "20230411-180123";
-  fpga-hash = "5e974a8";
+  timestamp = "20230411-180123";
+  revision = "5e974a8";
 
-  fetchDefFile =
+  fetchDefinition =
     name: hash:
     fetchzip {
-      inherit name;
-      url = "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${fpga-timestamp}/symbiflow-arch-defs-${name}-${fpga-hash}.tar.xz";
-      inherit hash;
+      inherit name hash;
+      url = "https://storage.googleapis.com/symbiflow-arch-defs/artifacts/prod/foss-fpga-tools/symbiflow-arch-defs/continuous/install/${timestamp}/symbiflow-arch-defs-${name}-${revision}.tar.xz";
       stripRoot = false;
     };
 
 in
 {
-  timestamp = fpga-timestamp;
-  hash = fpga-hash;
+  inherit timestamp;
+  hash = revision;
 }
-// lib.attrsets.mapAttrs fetchDefFile fpga-package-hashes
+// lib.mapAttrs fetchDefinition deviceHashes

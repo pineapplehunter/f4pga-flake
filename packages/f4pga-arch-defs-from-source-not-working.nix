@@ -46,6 +46,9 @@ stdenv.mkDerivation {
   pname = "f4pga-arch-defs";
   version = "unstable-2021-12-14";
 
+  strictDeps = true;
+  __structuredAttrs = true;
+
   src = fetchFromGitHub {
     owner = "f4pga";
     repo = "f4pga-arch-defs";
