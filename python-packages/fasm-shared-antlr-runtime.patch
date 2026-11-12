@@ -1,0 +1,14 @@
+Use the packaged shared ANTLR runtime when building through PEP 517,
+which does not consume the legacy setupPyBuildFlags attribute.
+
+--- a/setup.py
++++ b/setup.py
+@@ -76,7 +76,7 @@
+     ]
+ 
+     def __init__(self):
+-        self.antlr_runtime = 'static'
++        self.antlr_runtime = 'shared'
+ 
+     def initialize(self, other):
+         other.antlr_runtime = None

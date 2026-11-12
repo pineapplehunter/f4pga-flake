@@ -7,6 +7,7 @@
   jdk,
   lib,
   nix-update-script,
+  setuptools,
   textx,
 
   enableAntlr ? true,
@@ -15,7 +16,7 @@
 buildPythonPackage {
   pname = "fasm";
   version = "0.0.2-unstable-2022-07-25";
-  format = "setuptools";
+  pyproject = true;
 
   src = fetchFromGitHub {
     owner = "chipsalliance";
@@ -25,10 +26,12 @@ buildPythonPackage {
     hash = "sha256-evOtRl2FYa+9VIGpOc9Az7qAHFwt5dmukrpMXPBTZ7o=";
   };
 
-  nativeBuildInputs = [
+  build-system = [
     cython
-  ]
-  ++ lib.optionals enableAntlr [
+    setuptools
+  ];
+
+  nativeBuildInputs = lib.optionals enableAntlr [
     cmake
     jdk
   ];
@@ -44,11 +47,19 @@ buildPythonPackage {
 
   dontUseCmakeConfigure = true;
 
-  setupPyBuildFlags = lib.optionals enableAntlr [ "--antlr-runtime=shared" ];
+  # PEP 517 does not use setupPyBuildFlags; set the build command's default instead.
+  patches = lib.optionals enableAntlr [ ./fasm-shared-antlr-runtime.patch ];
 
   env.ANTLR4_RUNTIME_INCLUDE = "${antlr4_9.runtime.cpp.dev}/include/antlr4-runtime";
 
   pythonImportsCheck = [ "fasm" ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
+
+  meta = {
+    description = "FPGA Assembly format parser and utilities";
+    homepage = "https://github.com/chipsalliance/fasm";
+    license = lib.licenses.asl20;
+    mainProgram = "fasm";
+  };
 }
