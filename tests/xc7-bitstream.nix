@@ -11,22 +11,34 @@
 let
   defs = symlinkJoin {
     name = "xc7-bitstream-test-defs";
+    strictDeps = true;
+    __structuredAttrs = true;
     paths = with f4pga-arch-defs; [
       install-xc7
       archDef
     ];
   };
 
-  installDir = runCommand "xc7-bitstream-test-install-dir" { } ''
-    mkdir -p $out
-    ln -s ${defs} $out/xc7
-  '';
+  installDir =
+    runCommand "xc7-bitstream-test-install-dir"
+      {
+        strictDeps = true;
+        __structuredAttrs = true;
+      }
+      ''
+        mkdir -p $out
+        ln -s ${defs} $out/xc7
+      '';
 in
 runCommand "f4pga-${board}-bitstream-test"
   {
+    strictDeps = true;
+    __structuredAttrs = true;
     nativeBuildInputs = [ f4pga ];
-    FPGA_FAM = "xc7";
-    F4PGA_INSTALL_DIR = installDir;
+    env = {
+      FPGA_FAM = "xc7";
+      F4PGA_INSTALL_DIR = installDir;
+    };
   }
   ''
     cp -r ${source} source

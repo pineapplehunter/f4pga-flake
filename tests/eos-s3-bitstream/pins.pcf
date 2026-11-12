@@ -1,0 +1,5 @@
+# PD64 bidirectional pads, also used by upstream's Chandalar example.
+# These are package constraints for a software-only test, not board wiring.
+set_io a H7
+set_io b E8
+set_io y F6

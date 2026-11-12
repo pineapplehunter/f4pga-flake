@@ -90,6 +90,8 @@
           };
 
           checks = {
+            f4pga-packaging = pkgs.callPackage ./tests/f4pga-packaging.nix { };
+            eos-s3-bitstream = pkgs.callPackage ./tests/eos-s3-bitstream.nix { };
             xc7-bitstream = pkgs.callPackage ./tests/xc7-bitstream.nix { };
             xc7-bitstream-arty-a7-100t = pkgs.callPackage ./tests/xc7-bitstream.nix {
               archDef = pkgs.f4pga-arch-defs.xc7a100t_test;
