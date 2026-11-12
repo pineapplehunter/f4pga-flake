@@ -18,6 +18,8 @@
 let
   defs = symlinkJoin {
     name = "${family}-defs";
+    strictDeps = true;
+    __structuredAttrs = true;
     paths =
       with f4pga-arch-defs;
       lib.concatLists [
@@ -44,8 +46,15 @@ mkShellNoCC {
   FPGA_FAM = family;
   F4PGA_TIMESTAMP = f4pga-arch-defs.timestamp;
   F4PGA_HASH = f4pga-arch-defs.hash;
-  F4PGA_INSTALL_DIR = runCommand "${family}-defs-dir" { preferLocalBuild = true; } ''
-    mkdir -pv $out
-    ln -s ${defs} $out/${family}
-  '';
+  F4PGA_INSTALL_DIR =
+    runCommand "${family}-defs-dir"
+      {
+        preferLocalBuild = true;
+        strictDeps = true;
+        __structuredAttrs = true;
+      }
+      ''
+        mkdir -pv $out
+        ln -s ${defs} $out/${family}
+      '';
 }
