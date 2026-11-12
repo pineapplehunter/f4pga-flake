@@ -6,9 +6,6 @@ Reproducible, per-chip Nix packages for building FPGA bitstreams with F4PGA.
 - [Supported targets](#supported-targets)
 - [Quick start](#quick-start)
 - [Arty A7-100T example](#arty-a7-100t-example)
-  - [Design and constraints](#design-and-constraints)
-  - [Generate the bitstream](#generate-the-bitstream)
-  - [Program the FPGA](#program-the-fpga)
 - [Configured packages](#configured-packages)
 - [Verification](#verification)
 - [Known limitations](#known-limitations)
@@ -48,53 +45,9 @@ build/arty-a7-100t/top.bit
 
 ## Arty A7-100T example
 
-The [`examples/arty-a7-100t`](examples/arty-a7-100t) directory contains a complete minimal design for the `XC7A100TCSG324-1` device.
+This LED-blinker example for the `XC7A100TCSG324-1` device has been tested successfully on a physical Arty A7-100T board. This does not imply hardware validation of other targets.
 
-This example has been tested successfully on a physical Arty A7-100T board. This confirms that sample on that board, not hardware validation of every supported target.
-
-### Design and constraints
-
-[`top.v`](examples/arty-a7-100t/top.v) implements a 26-bit counter. Its most significant bit drives an LED, producing a visible blink from the board's 100 MHz clock.
-
-[`arty-a7-100t.xdc`](examples/arty-a7-100t/arty-a7-100t.xdc) assigns:
-
-- `clk` to pin `E3` with a 10 ns clock period
-- `led` to pin `H5`
-- both signals to the `LVCMOS33` I/O standard
-
-[`flow.json`](examples/arty-a7-100t/flow.json) selects the FPGA part, source files, constraints, output directory, and bitstream target used by F4PGA.
-
-### Generate the bitstream
-
-From the repository root:
-
-```shell
-cd examples/arty-a7-100t
-nix run ../..#f4pga-xc7a100t -- build --flow flow.json
-```
-
-A clean build of this small example takes approximately two minutes on a modern laptop, excluding the initial Nix downloads.
-
-### Program the FPGA
-
-To build and load the example in one command, connect and power the Arty A7-100T,
-then run from the repository root:
-
-```shell
-nix run .#arty-a7-100t-demo
-```
-
-This uses the packaged bitstream and openFPGALoader to program volatile FPGA
-memory, not configuration flash. The design is lost when power is removed.
-Run it on the host with USB access; Linux may require openFPGALoader udev rules.
-
-With [openFPGALoader](https://github.com/trabucayre/openFPGALoader) installed and the board connected, load the bitstream into volatile FPGA memory:
-
-```shell
-openFPGALoader -b arty_a7_100t build/arty-a7-100t/top.bit
-```
-
-The LED connected to `H5` should blink. Programming commands differ by device, board, programmer, and whether the design is loaded into volatile memory or persistent configuration flash.
+See the [example directory](examples/arty-a7-100t/README.md) for more information on how to use this, including generating the bitstream and programming the board.
 
 ## Configured packages
 
