@@ -1,27 +1,24 @@
 {
-  fetchFromGitHub,
+  lib,
   buildPythonPackage,
-  simplejson,
-  intervaltree,
-  nix-update-script,
   fasm,
+  intervaltree,
   numpy,
+  prjxray-tools,
   pyjson5,
   pyyaml,
+  setuptools,
+  simplejson,
 }:
 
 buildPythonPackage {
   pname = "prjxray";
-  version = "0.1-unstable-2025-06-05";
-  format = "setuptools";
+  # Keep the Python library and native tools on the same database/API revision.
+  # Update the shared source through prjxray-tools.
+  inherit (prjxray-tools) src version;
+  pyproject = true;
 
-  src = fetchFromGitHub {
-    owner = "f4pga";
-    repo = "prjxray";
-    rev = "c9f02d8576042325425824647ab5555b1bc77833";
-    hash = "sha256-cuqjVLTy9JZxuoD8vPsRfSFCv/HhhSdburx1a9EJajM=";
-    fetchSubmodules = true;
-  };
+  build-system = [ setuptools ];
 
   dependencies = [
     fasm
@@ -37,6 +34,9 @@ buildPythonPackage {
     "prjxray.fasm_assembler"
   ];
 
-  passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
-
+  meta = {
+    description = "Python library for the Project X-Ray Xilinx 7-series database";
+    homepage = "https://github.com/f4pga/prjxray";
+    license = lib.licenses.isc;
+  };
 }
