@@ -1,7 +1,7 @@
 {
+  lib,
   fetchFromGitHub,
   gtest,
-  lib,
   python3,
   readline,
   stdenv,
@@ -37,23 +37,22 @@ let
     "xdc"
   ];
 
-  static_gtest = gtest.overrideAttrs (old: {
-    dontDisableStatic = true;
-    disableHardening = [ "pie" ];
-    cmakeFlags = old.cmakeFlags ++ [ "-DBUILD_SHARED_LIBS=OFF" ];
-  });
+  staticGtest = gtest.override { static = true; };
 
 in
 lib.genAttrs plugins (
   plugin:
-  stdenv.mkDerivation (rec {
+  stdenv.mkDerivation {
     pname = "yosys-symbiflow-${plugin}-plugin";
     inherit src version plugin;
+    strictDeps = true;
+    __structuredAttrs = true;
     enableParallelBuilding = true;
 
     nativeBuildInputs = [
       python3
       pkg-config
+      yosys
     ];
     buildInputs = [
       yosys
@@ -63,7 +62,7 @@ lib.genAttrs plugins (
 
     # xdc has an incorrect path to a test which has yet to be patched
     doCheck = plugin != "xdc";
-    nativeCheckInputs = [ static_gtest ];
+    checkInputs = [ staticGtest ];
 
     # A Makefile rule tries to wget-fetch a yosys script from github.
     # Link the script from our yosys sources in preBuild instead, so that
@@ -75,16 +74,13 @@ lib.genAttrs plugins (
     # Providing a symlink avoids the need for patching the test makefile
     postUnpack = ''
       mkdir -p source/third_party/googletest/build/
-      ln -s ${static_gtest}/lib source/third_party/googletest/build/lib
+      ln -s ${staticGtest}/lib source/third_party/googletest/build/lib
     '';
 
     makeFlags = [
       "PLUGIN_LIST=${plugin}"
-    ];
-
-    buildFlags = [
-      "YOSYS_PLUGINS_DIR=\${out}/share/yosys/plugins/"
-      "YOSYS_DATA_DIR=\${out}/share/yosys/"
+      "YOSYS_PLUGINS_DIR=${placeholder "out"}/share/yosys/plugins/"
+      "YOSYS_DATA_DIR=${placeholder "out"}/share/yosys/"
     ];
 
     checkTarget = "test";
@@ -98,16 +94,15 @@ lib.genAttrs plugins (
       )
     ];
 
-    installFlags = buildFlags;
-
-    meta = with lib; {
+    meta = {
       description = "Symbiflow ${plugin} plugin for Yosys";
-      license = licenses.isc;
-      platforms = platforms.all;
-      maintainers = with maintainers; [
+      homepage = "https://github.com/chipsalliance/yosys-f4pga-plugins";
+      license = lib.licenses.isc;
+      platforms = lib.platforms.all;
+      maintainers = with lib.maintainers; [
         ollieB
         thoughtpolice
       ];
     };
-  })
+  }
 )
