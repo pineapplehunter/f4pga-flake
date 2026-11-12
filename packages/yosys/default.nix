@@ -1,8 +1,9 @@
 # Yosys 0.47 recipe from nixpkgs 5e4fbfb6b3de1aa2872b76d49fafc942626e2add,
 # built with current nixpkgs dependencies. F4PGA only needs the CLI, not Pyosys.
 {
-  stdenv,
   lib,
+  stdenv,
+  bash,
   bison,
   callPackage,
   fetchFromGitHub,
@@ -24,18 +25,20 @@ let
     plugins:
     let
       paths = lib.closePropagation plugins;
-      module_flags =
-        with builtins;
-        concatStringsSep " " (map (n: "--add-flags -m --add-flags ${n.plugin}") plugins);
+      moduleFlags = lib.concatMapStringsSep " " (
+        plugin: "--add-flags -m --add-flags ${plugin.plugin}"
+      ) plugins;
     in
     lib.appendToName "with-plugins" (symlinkJoin {
       inherit (yosys) name;
+      strictDeps = true;
+      __structuredAttrs = true;
       paths = paths ++ [ yosys ];
       nativeBuildInputs = [ makeWrapper ];
       postBuild = ''
         wrapProgram $out/bin/yosys \
           --set NIX_YOSYS_PLUGIN_DIRS $out/share/yosys/plugins \
-          ${module_flags}
+          ${moduleFlags}
       '';
       meta.mainProgram = "yosys";
     });
@@ -50,6 +53,9 @@ in
 stdenv.mkDerivation (finalAttrs: {
   pname = "yosys-f4pga";
   version = "0.47";
+
+  strictDeps = true;
+  __structuredAttrs = true;
 
   src = fetchFromGitHub {
     owner = "YosysHQ";
@@ -77,17 +83,15 @@ stdenv.mkDerivation (finalAttrs: {
     pkg-config
     bison
     flex
+    tcl
+    (python3.withPackages (ps: [ ps.click ]))
   ];
+  buildInputs = [ bash ];
   propagatedBuildInputs = [
     tcl
     readline
     libffi
     zlib
-    (python3.withPackages (
-      pp: with pp; [
-        click
-      ]
-    ))
   ];
 
   makeFlags = [ "PREFIX=${placeholder "out"}" ];
@@ -99,10 +103,8 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   postPatch = ''
-    substituteInPlace ./Makefile \
-      --replace-fail 'echo UNKNOWN' 'echo ${builtins.substring 0 10 finalAttrs.src.rev}'
-
-    patchShebangs tests ./misc/yosys-config.in
+    patchShebangs --build tests
+    patchShebangs --host ./misc/yosys-config.in
   '';
 
   preBuild = ''
@@ -132,12 +134,13 @@ stdenv.mkDerivation (finalAttrs: {
     inherit withPlugins allPlugins;
   };
 
-  meta = with lib; {
+  meta = {
     description = "F4PGA-compatible Yosys built with current nixpkgs";
     homepage = "https://yosyshq.net/yosys/";
-    license = licenses.isc;
-    platforms = platforms.all;
-    maintainers = with maintainers; [
+    license = lib.licenses.isc;
+    platforms = lib.platforms.all;
+    mainProgram = "yosys";
+    maintainers = with lib.maintainers; [
       shell
       thoughtpolice
       Luflosi
