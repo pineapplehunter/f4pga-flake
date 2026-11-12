@@ -21,15 +21,19 @@ buildPythonPackage {
     hash = "sha256-cDscgsOswTowFCmd7cUDesKDqfA8zt9u4wFPfZaPESE=";
   };
 
+  patches = [ ./ql-fasm-local-database-path.patch ];
+
   build-system = [ setuptools ];
 
   dependencies = [
     fasm
     ql-fasm-utils
-    setuptools
   ];
 
-  pythonImportsCheck = [ "quicklogic_fasm" ];
+  pythonImportsCheck = [
+    "quicklogic_fasm"
+    "quicklogic_fasm.qlfasm"
+  ];
 
   passthru.updateScript = nix-update-script { extraArgs = [ "--version=branch" ]; };
 

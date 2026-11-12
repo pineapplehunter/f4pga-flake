@@ -1,0 +1,18 @@
+Locate the packaged database relative to the module without pkg_resources,
+which was removed from recent setuptools releases.
+
+--- a/quicklogic_fasm/qlfasm.py
++++ b/quicklogic_fasm/qlfasm.py
+@@ -7,11 +7,9 @@
+ import errno
+ from pathlib import Path
+ from fasm_utils.database import Database
+-import pkg_resources
+ 
+ 
+-DB_FILES_DIR = Path(
+-    pkg_resources.resource_filename('quicklogic_fasm', 'ql732b'))
++DB_FILES_DIR = Path(__file__).parent / 'ql732b'
+ 
+ 
+ class QL732BAssembler(fasm_assembler.FasmAssembler):
